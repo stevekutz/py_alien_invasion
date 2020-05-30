@@ -4,11 +4,12 @@ import pygame
 # from pygame.locals import *
 
 from settings import Settings
+from ship import Ship
 
 class AlienInvasion:
     
     def __init__(self):
-        "Initialize game & resources"
+        """Initialize game & resources"""
         pygame.init()   # intializes background settings
         self.settings = Settings()
 
@@ -16,11 +17,13 @@ class AlienInvasion:
         self.screen = pygame.display.set_mode((self.settings.screen_width, self.settings.screen_height)) 
         pygame.display.set_caption("Alien_Invasion")
 
+        self.ship = Ship(self)
+
         # set background color
         self.bg_color = (230, 230, 230)
 
     def run_game(self):
-        "Start main loop in game"
+        """Start main loop in game"""
         while True:
             # create event listener to watch keyboard or mouse events
             for event in pygame.event.get():
@@ -30,6 +33,7 @@ class AlienInvasion:
             # Redraw screen during each pass through the loop
             # a surface obj is created via self.screen
             self.screen.fill(self.settings.bg_color)
+            self.ship.blitme()
 
             # make most recent screen drawn visible
             pygame.display.flip()

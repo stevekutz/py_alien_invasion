@@ -82,3 +82,48 @@ python3 -m pip install -U pygame==2.0.0.dev6 --user
             self.screen_height = 800
             self.bg_color = (230, 230, 230)    # defined as RGB colors
     ~~~
+
+3) Create `Ship` class
+
+    ~~~ py
+    import pygame
+
+    class Ship:
+        """A class to manage the ship """
+
+        # 
+        def __init__(self,ai_game):
+            self.screen = ai_game.screen
+            self.screen_rect = ai_game.screen.get_rect()
+
+            # Load ship image and get its rect
+            self.image = pygame.image.load('images/ship2.bmp')
+            self.rect = self.image.get_rect()
+
+            # start each new ship at bottom center of surface (e.g. display screen)
+            self.rect.midbottom = self.screen_rect.midbottom
+
+        def blitme(self):
+            """ Draw the ship at its current location """
+            self.screen.blit(self.image, self.rect)
+    ~~~
+
+4) Add `Ship` to `alien_invasion.py`
+
+    ~~~ py
+    ...
+    from settings import Settings
+    from ship import Ship
+    ...
+
+    ...
+    pygame.display.set_caption("Alien_Invasion")
+
+    self.ship = Ship(self)
+    ...
+
+    ...
+    self.screen.fill(self.settings.bg_color)
+    self.ship.blitme()
+    ...
+    ~~~
