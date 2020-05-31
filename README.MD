@@ -94,6 +94,7 @@ python3 -m pip install -U pygame==2.0.0.dev6 --user
 
         # 
         def __init__(self,ai_game):
+            """ Initialize ship to self and instance of current AlienInvasion class  """
             self.screen = ai_game.screen
             self.screen_rect = ai_game.screen.get_rect()
 
@@ -212,3 +213,68 @@ python3 -m pip install -U pygame==2.0.0.dev6 --user
 
     def blitme(self):
 ~~~
+
+7) Adjust ship speed to use float values
+
+- add `self.settings` to `ship.py`
+    ~~~ py
+    def __init__(self,ai_game):
+            """ Initialize ship to self and instance of current AlienInvasion class  """
+            self.screen = ai_game.screen
+            self.settings = ai_game.settings
+            self.screen_rect = ai_game.screen.get_rect()
+    ~~~
+
+-  at bottom of `__init__` add `self.x`  
+
+~~~ py
+     # store ship position as float
+     self.x = float(self.rect.x)
+~~~
+
+- improve the `update` method to keep ship on screen in `ship.py`
+
+    ~~~ py
+        def update(self):
+            """ Update the ship position based on the movement flag  """    
+            if self.moving_right and self.rect.right < self.screen_rect.right:
+                # self.rect.x += 1
+                self.x += self.settings.ship_speed
+            if self.moving_left and self.rect.left > 0:
+                # self.rect.x -= 1   
+                self.x -= self.settings.ship_speed      
+
+            # update the rect obj
+            self.rect.x = self.x 
+    ~~~
+
+8) Refactor `_check_events` and add helper methods in `alein_invasion.py`  
+
+    ~~~ py
+        def _check_events(self):
+            # create event listener to watch keyboard or mouse events
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    sys.exit()
+                elif event.type == pygame.KEYDOWN:
+                    self._check_keydown_events(event)
+                elif event.type == pygame.KEYUP:
+                    self._check_keyup_events(event)
+    
+        def _check_keydown_events(self, event):
+            """ Set directions for current movements """
+            if event.key == pygame.K_RIGHT:
+                self.ship.moving_right = True  # move ship to the right
+            elif event.key == pygame.K_LEFT:
+                self.ship.moving_left = True   # move ship to the left
+            elif event.key == pygame.K_q:      # quit is Q is pressed
+                sys.exit()    
+
+        def _check_keyup_events(self, event):
+            """ respond to changes in direction """
+            if event.key == pygame.K_RIGHT:
+                self.ship.moving_right = False   # moving right key released, stop moving
+            elif event.key == pygame.K_LEFT:
+                self.ship.moving_left = False   # moving left key released, stop moving
+
+    ~~~
