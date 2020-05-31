@@ -19,7 +19,7 @@ source v_env/bin/activate
 python3 -m pip install -U pygame==2.0.0.dev6 --user
 ~~~
 
-
+- NOTE: The game can be run from virtual environment via `python3 alien_invasion.py`
 
 #### Build Classes
 
@@ -62,6 +62,7 @@ python3 -m pip install -U pygame==2.0.0.dev6 --user
                 self.screen.fill(self.settings.bg_color)
 
                 # make most recent screen drawn visible
+                # updates entire display
                 pygame.display.flip()
 
     if __name__ == '__main__':    
@@ -105,6 +106,7 @@ python3 -m pip install -U pygame==2.0.0.dev6 --user
 
         def blitme(self):
             """ Draw the ship at its current location """
+            # blit() draws one image onto another
             self.screen.blit(self.image, self.rect)
     ~~~
 
@@ -119,6 +121,7 @@ python3 -m pip install -U pygame==2.0.0.dev6 --user
     ...
     pygame.display.set_caption("Alien_Invasion")
 
+    # the self.ship instance is assigned to give Ship access to all game resourses via self parameter
     self.ship = Ship(self)
     ...
 
@@ -127,3 +130,85 @@ python3 -m pip install -U pygame==2.0.0.dev6 --user
     self.ship.blitme()
     ...
     ~~~
+
+5) Refactor the `run_game` method
+- `_check_events` and `_update_screen` methods are used to simplify `run_game`
+    ~~~ py
+        def run_game(self):
+            """Start main loop in game"""
+            while True:
+                self._check_events()  # check event listener
+                self._update_screen() # refresh screen
+
+        def _check_events(self):
+            # create event listener to watch keyboard or mouse events
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    sys.exit()
+                elif event.type == pygame.KEYDOWN:  # detects is any key is pressed
+                    if event.key == pygame.K_RIGHT:
+
+
+        def _update_screen(self):
+            """ Update images """
+            # Redraw screen during each pass through the loop
+            # a surface obj is created via self.screen
+            self.screen.fill(self.settings.bg_color)
+            self.ship.blitme()
+
+            # Redraw screen during each pass through the loop
+            # a surface obj is created via self.screen
+            self.screen.fill(self.settings.bg_color)
+            self.ship.blitme()
+            
+            # make most recent screen drawn visible
+            # updates entire display
+            pygame.display.flip()
+    ~~~
+
+6) Implement ability to move ship
+
+- modify the `run_game` module to include `self.ship.update()` in `alien_invasion.py`
+
+    ~~~ py
+        def run_game(self):
+            """Start main loop in game"""
+            while True:
+                self._check_events()  # check event listener
+                self.ship.update()  # update position
+                self._update_screen() # refresh screen
+    ~~~
+
+- update the `_check_events` of `alien_invasion`
+
+~~~ py
+    def _check_events(self):
+        # create event listener to watch keyboard or mouse events
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                sys.exit()
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_RIGHT:
+                    self.ship.moving_right = True  # move ship to the right
+                elif event.key == pygame.K_LEFT:
+                    self.ship.moving_left = True   # move ship to the left
+
+            elif event.type == pygame.KEYUP:
+                if event.key == pygame.K_RIGHT:
+                    self.ship.moving_right = False   # moving right key released, stop moving
+                elif event.key == pygame.K_LEFT:
+                    self.ship.moving_left = False   # moving left key released, stop moving  
+~~~
+
+- add moving left & right functionality to the `update` method of `ship.py`
+
+~~~ py
+    def update(self):
+        """ Update the ship position based on the movement flag  """    
+        if self.moving_right:
+            self.rect.x += 1
+        if self.moving_left:
+            self.rect.x -= 1    
+
+    def blitme(self):
+~~~
