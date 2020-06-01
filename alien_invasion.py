@@ -5,6 +5,7 @@ import pygame
 
 from settings import Settings
 from ship import Ship
+from bullet import Bullet
 
 class AlienInvasion:
     
@@ -19,15 +20,17 @@ class AlienInvasion:
 
         # the self.ship instance is assigned to give Ship access to all game resourses via self parameter
         self.ship = Ship(self)
+        self.bullets = pygame.sprite.Group() # similar to a list with extra features
 
         # set background color
-        self.bg_color = (230, 230, 230)
+        # self.bg_color = (230, 230, 230)
 
     def run_game(self):
         """Start main loop in game"""
         while True:
             self._check_events()  # check event listener
             self.ship.update()  # update position
+            self.bullets.update()  # will update each sprite in the group
             self._update_screen() # refresh screen
 
     def _check_events(self):
@@ -42,12 +45,15 @@ class AlienInvasion:
    
     def _check_keydown_events(self, event):
         """ Set directions for current movements """
+        print('key pressed was ', (event))
         if event.key == pygame.K_RIGHT:
             self.ship.moving_right = True  # move ship to the right
         elif event.key == pygame.K_LEFT:
             self.ship.moving_left = True   # move ship to the left
         elif event.key == pygame.K_q:      # quit is Q is pressed
             sys.exit()    
+        elif event.key == pygame.K_SPACE:
+            self._fire_bullet()    
 
     def _check_keyup_events(self, event):
         """ respond to changes in direction """
@@ -56,17 +62,19 @@ class AlienInvasion:
         elif event.key == pygame.K_LEFT:
             self.ship.moving_left = False   # moving left key released, stop moving
 
+    def _fire_bullet(self):
+        """ Create a new bullet and add it to the bullets group """
+        new_bullet = Bullet(self)
+        self.bullets.add(new_bullet)
+
     def _update_screen(self):
         """ Update images """
         # Redraw screen during each pass through the loop
         # a surface obj is created via self.screen
         self.screen.fill(self.settings.bg_color)
         self.ship.blitme()
-
-        # Redraw screen during each pass through the loop
-        # a surface obj is created via self.screen
-        self.screen.fill(self.settings.bg_color)
-        self.ship.blitme()
+        for bullet in self.bullets.sprites():
+            bullet.draw_bullet()
 
         # make most recent screen drawn visible
         # updates entire display
