@@ -31,6 +31,8 @@ class AlienInvasion:
             self._check_events()  # check event listener
             self.ship.update()  # update position
             self.bullets.update()  # will update each sprite in the group
+            self._update_bullets()    
+
             self._update_screen() # refresh screen
 
     def _check_events(self):
@@ -64,8 +66,17 @@ class AlienInvasion:
 
     def _fire_bullet(self):
         """ Create a new bullet and add it to the bullets group """
-        new_bullet = Bullet(self)
-        self.bullets.add(new_bullet)
+        if len(self.bullets) < self.settings.bullets_allowed:
+            new_bullet = Bullet(self)
+            self.bullets.add(new_bullet)
+
+    def _update_bullets(self):
+        """  Update position of bullets to get rid of bullets that have exited screen """
+        # Remove bullets that have reached top of screen
+        for bullet in self.bullets.copy():
+            if bullet.rect.bottom <= 0:
+                self.bullets.remove(bullet)
+            print(len(self.bullets)) 
 
     def _update_screen(self):
         """ Update images """

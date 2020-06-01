@@ -156,18 +156,13 @@ python3 -m pip install -U pygame==2.0.0.dev6 --user
             # a surface obj is created via self.screen
             self.screen.fill(self.settings.bg_color)
             self.ship.blitme()
-
-            # Redraw screen during each pass through the loop
-            # a surface obj is created via self.screen
-            self.screen.fill(self.settings.bg_color)
-            self.ship.blitme()
             
             # make most recent screen drawn visible
             # updates entire display
             pygame.display.flip()
     ~~~
 
-6) Implement ability to move ship
+1) Implement ability to move ship
 
 - modify the `run_game` module to include `self.ship.update()` in `alien_invasion.py`
 
