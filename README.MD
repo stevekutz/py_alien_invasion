@@ -320,6 +320,65 @@ python3 -m pip install -U pygame==2.0.0.dev6 --user
             pygame.draw.rect(self.screen, self.color, self.rect)
     ~~~
 
-11) 
+11) Create `alien` class
+
+    ~~~ py
+    import pygame
+    from pygame.sprite import Sprite
 
 
+    class Alien(Sprite):
+        """ Class for single alien in fleet """
+
+        def __init__(self, ai_game):
+            """ Initialize alien and start position """
+            super().__init__()
+            self.screen = ai_game.screen
+
+            # Load alien image and set rect attribute
+            self.image = pygame.image.load('images/alien.bmp')
+            self.rect = self.image.get_rect()
+
+            # Start each new alien at top of screen
+            self.rect.x = self.rect.width
+            self.rect.y = self.rect.height
+
+            # Store alien's horizontal position as float
+            self.x = float(self.rect.x)
+    ~~~
+
+12) Update `alien_invaion.py` to render alien
+
+- add import for `Alien` class
+
+    ~~~ py
+    from bullet import Bullet
+    from alien import Alien
+    ~~~
+
+- update  `__init__`
+
+    ~~~ py
+    # create instance of alien
+    self.aliens = pygame.sprite.Group()
+    self._create_fleet()
+    ~~~
+
+- create `_create_fleet` method
+
+    ~~~ py
+    def _create_fleet(self):
+        """ Create a fleet of aliens """
+        alien = Alien(self)
+        self.aliens.add(alien)
+    ~~~
+
+- add to `_update_screen` to draw alien
+
+    ~~~ py
+    for bullet in self.bullets.sprites():
+        bullet.draw_bullet()
+
+    # call draw method to render alien
+    self.aliens.draw(self.screen)
+    ~~~
