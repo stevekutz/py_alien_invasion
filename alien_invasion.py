@@ -41,6 +41,7 @@ class AlienInvasion:
             self.ship.update()  # update position
             self.bullets.update()  # will update each sprite in the group
             self._update_bullets()    
+            self._update_aliens()
 
             self._update_screen() # refresh screen
 
@@ -87,6 +88,12 @@ class AlienInvasion:
                 self.bullets.remove(bullet)
             print(len(self.bullets)) 
 
+    def _update_aliens(self):
+        """ Verify if fleet at edges. if so, change position of fleet """
+        self._check_fleet_edges()
+
+        self.aliens.update()
+
     def _create_fleet(self):
         """ Create a fleet of aliens """
         alien = Alien(self)  # used for calculations, NOT part of fleet
@@ -117,6 +124,19 @@ class AlienInvasion:
         # Each alien row starts below at twice the height of an alien ship
         alien.rect.y = alien.rect.height + 2 * alien.rect.height * row_number 
         self.aliens.add(alien)
+
+    def _check_fleet_edges(self):
+        """ Determine if fleet hits edge of screen and respond  """
+        for alien in self.aliens.sprites():
+            if alien.check_edges():
+                self._change_fleet_direction()
+                break
+
+    def _change_fleet_direction(self):
+        """ Drop the entire fleet and change direction """  
+        for alien in self.aliens.sprites():
+            alien.rect.y += self.settings.fleet_drop_speed
+        self.settings.fleet_direction *= -1          
 
     def _update_screen(self):
         """ Update images """
