@@ -16,7 +16,14 @@ class AlienInvasion:
         self.settings = Settings()
 
         # the self.screen obj creates a `surface` that represents game screen where elements can be drawn
+        ###  run in 1200 x 800 mode
         self.screen = pygame.display.set_mode((self.settings.screen_width, self.settings.screen_height)) 
+        
+        ### run in fullscreen mode
+        # self.screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
+        # self.settings.screen_width = self.screen.get_rect().width
+        # self.settings.screen_height = self.screen.get_rect().height
+
         pygame.display.set_caption("Alien_Invasion")
 
         # the self.ship instance is assigned to give Ship access to all game resourses via self parameter
@@ -82,7 +89,33 @@ class AlienInvasion:
 
     def _create_fleet(self):
         """ Create a fleet of aliens """
+        alien = Alien(self)  # used for calculations, NOT part of fleet
+        
+        # Get dimensions for ship & alien
+        ship_height = self.ship.rect.height
+        alien_width, alien_height = alien.rect.size
+        
+        # find available space for aliens to fit on screen
+        available_space_y = (self.settings.screen_height - (3 * alien_height) - ship_height)
+        available_space_x = self.settings.screen_width - ( 2 * alien_width )
+        
+        # detemine total number of aliens per row & total number of rows 
+        number_aliens_x = available_space_x // ( 2 * alien_width )
+        number_rows = available_space_y // ( 2 * alien_height )
+
+        # Create rows of aliens
+        for row_number in range(number_rows):
+            for alien_number in range(number_aliens_x):
+            # Fill row with aliens
+                self._create_alien(alien_number, row_number )
+
+    def _create_alien(self, alien_number, row_number):
         alien = Alien(self)
+        alien_width, height = alien.rect.size
+        alien.x = alien_width + 2 * alien_width * alien_number
+        alien.rect.x = alien.x
+        # Each alien row starts below at twice the height of an alien ship
+        alien.rect.y = alien.rect.height + 2 * alien.rect.height * row_number 
         self.aliens.add(alien)
 
     def _update_screen(self):

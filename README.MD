@@ -26,7 +26,7 @@ python3 -m pip install -U pygame==2.0.0.dev6 --user
 1) Create `alien_invasion.py` 
 
 - import `sys` (allows exiting of game) & `pygame` (contains game functionality) 
-
+- pygame allows `FULLSCREEN` mode
     ~~~ py
     import sys
 
@@ -42,8 +42,14 @@ python3 -m pip install -U pygame==2.0.0.dev6 --user
             pygame.init()   # intializes background settings
             self.settings = Settings()
 
-            # the self.screen obj creates a `surface` that represents game screen where elements can be drawn
-            self.screen = pygame.display.set_mode((self.settings.screen_width, self.settings.screen_height)) 
+        # the self.screen obj creates a `surface` that represents game screen where elements can be drawn
+        ###  run in 1200 x 800 mode
+        # self.screen = pygame.display.set_mode((self.settings.screen_width, self.settings.screen_height)) 
+        
+        ### run in fullscreen mode
+        self.screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
+        self.settings.screen_width = self.screen.get_rect().width
+        self.settings.screen_height = self.screen.get_rect().height
             pygame.display.set_caption("Alien_Invasion")
 
             # set background color
@@ -381,4 +387,42 @@ python3 -m pip install -U pygame==2.0.0.dev6 --user
 
     # call draw method to render alien
     self.aliens.draw(self.screen)
+    ~~~
+
+13) Refactor `alien_invasion.py` to render fleet of aliens
+
+- `_create_fleet` calls upon a helper function `_create_alien`
+- the number of rows and aliens per row is calculated based on whether 800 x 1200 OR FULLSCREEN mode is used
+
+    ~~~ py
+        def _create_fleet(self):
+            """ Create a fleet of aliens """
+            alien = Alien(self)  # used for calculations, NOT part of fleet
+            
+            # Get dimensions for ship & alien
+            ship_height = self.ship.rect.height
+            alien_width, alien_height = alien.rect.size
+            
+            # find available space for aliens to fit on screen
+            available_space_y = (self.settings.screen_height - (3 * alien_height) - ship_height)
+            available_space_x = self.settings.screen_width - ( 2 * alien_width )
+            
+            # detemine total number of aliens per row & total number of rows 
+            number_aliens_x = available_space_x // ( 2 * alien_width )
+            number_rows = available_space_y // ( 2 * alien_height )
+
+            # Create rows of aliens
+            for row_number in range(number_rows):
+                for alien_number in range(number_aliens_x):
+                # Fill row with aliens
+                    self._create_alien(alien_number, row_number )
+
+        def _create_alien(self, alien_number, row_number):
+            alien = Alien(self)
+            alien_width, height = alien.rect.size
+            alien.x = alien_width + 2 * alien_width * alien_number
+            alien.rect.x = alien.x
+            # Each alien row starts below at twice the height of an alien ship
+            alien.rect.y = alien.rect.height + 2 * alien.rect.height * row_number 
+            self.aliens.add(alien)
     ~~~
