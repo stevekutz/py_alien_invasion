@@ -97,18 +97,23 @@ class AlienInvasion:
     def _create_fleet(self):
         """ Create a fleet of aliens """
         alien = Alien(self)  # used for calculations, NOT part of fleet
-        
+            # <Alien sprite(in 0 groups)>
+
         # Get dimensions for ship & alien
         ship_height = self.ship.rect.height
-        alien_width, alien_height = alien.rect.size
+        alien_width, alien_height = alien.rect.size   # (60, 58)
         
         # find available space for aliens to fit on screen
         available_space_y = (self.settings.screen_height - (3 * alien_height) - ship_height)
         available_space_x = self.settings.screen_width - ( 2 * alien_width )
-        
+            # available_space_y = (800) - (3 * 58) - 48    = 578
+            # available_space_x = 1200 - (2 * 60)    = 1080
+
         # detemine total number of aliens per row & total number of rows 
         number_aliens_x = available_space_x // ( 2 * alien_width )
         number_rows = available_space_y // ( 2 * alien_height )
+            # number_aliens_x = 1080 // (2 * 60)   = 9
+            # number_rows = 578 // (2 * 58)  = 4
 
         # Create rows of aliens
         for row_number in range(number_rows):
@@ -116,20 +121,26 @@ class AlienInvasion:
             # Fill row with aliens
                 self._create_alien(alien_number, row_number )
 
+        # rect = <rect(x, y, width, height)>       <rect(180, 58, 60, 58)>
     def _create_alien(self, alien_number, row_number):
         alien = Alien(self)
         alien_width, height = alien.rect.size
         alien.x = alien_width + 2 * alien_width * alien_number
+            # alien.x = 60 + (2 * 60 * 0..9)   alien.x = 60.0, 180.0, 300.0, 420.0, ...
         alien.rect.x = alien.x
         # Each alien row starts below at twice the height of an alien ship
         alien.rect.y = alien.rect.height + 2 * alien.rect.height * row_number 
+            # alien.rect.y =   58 + (2 * 58 * 0..4)                     58, 174, 290 
         self.aliens.add(alien)
 
     def _check_fleet_edges(self):
         """ Determine if fleet hits edge of screen and respond  """
         for alien in self.aliens.sprites():
             if alien.check_edges():
+                print("alien.check_edges is ", alien.check_edges)
+                print("direction BEFORE ", self.settings.fleet_direction)
                 self._change_fleet_direction()
+                print("direction AFTER ", self.settings.fleet_direction)
                 break
 
     def _change_fleet_direction(self):

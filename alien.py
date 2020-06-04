@@ -8,16 +8,18 @@ class Alien(Sprite):
     def __init__(self, ai_game):
         """ Initialize alien and start position """
         super().__init__()
-        self.screen = ai_game.screen
-        self.settings = ai_game.settings
+        self.screen = ai_game.screen    # <Surface(1200x800x32 SW)>
+        self.settings = ai_game.settings    # 
 
         # Load alien image and set rect attribute
-        self.image = pygame.image.load('images/alien.bmp')
-        self.rect = self.image.get_rect()
+        self.image = pygame.image.load('images/alien.bmp')   # <Surface(60x58x24 SW)>
+        self.rect = self.image.get_rect()   # = <rect(0, 0, 60, 58)
 
         # Start each new alien at top of screen
-        self.rect.x = self.rect.width
-        self.rect.y = self.rect.height
+        # rect looks at (x,y) coordinate of top left corner
+        self.rect.x = self.rect.width   # 60
+        self.rect.y = self.rect.height  # 0
+            # now self.rect = <rect(60, 0, 60, 58)
 
         # Store alien's horizontal position as float
         self.x = float(self.rect.x)

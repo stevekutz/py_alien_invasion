@@ -1,13 +1,13 @@
 ### Alien Invastion
 
 #### Project Setup
-1) Create virutal environment
+1) Create virtual environment
 
 ~~~ bash 
 python3 -m venv v_env
 ~~~
 
-2) Activate virutal environment
+2) Activate virtual environment
 
 ~~~ bash
 source v_env/bin/activate
@@ -389,7 +389,11 @@ python3 -m pip install -U pygame==2.0.0.dev6 --user
     self.aliens.draw(self.screen)
     ~~~
 
-13) Refactor `alien_invasion.py` to render fleet of aliens
+13) Refactor `alien.py`
+- 
+
+
+14) Refactor `alien_invasion.py` to render fleet of aliens
 
 - `_create_fleet` calls upon a helper function `_create_alien`
 - the number of rows and aliens per row is calculated based on whether 800 x 1200 OR FULLSCREEN mode is used
