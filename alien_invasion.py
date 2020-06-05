@@ -1,13 +1,17 @@
 import sys
 
+from time import sleep
+
 import pygame
 # from pygame.locals import *
 
 from settings import Settings
 from ship import Ship
-from weapons import Bullet
+from bullet import Bullet
 from alien import Alien
-from laser import LaserBlast
+# from laser import LaserBlast
+
+from game_stats import GameStats
 
 class AlienInvasion:
     
@@ -27,6 +31,9 @@ class AlienInvasion:
 
         pygame.display.set_caption("Alien_Invasion")
 
+        # Create isntance of game statistics
+        self.stats = GameStats(self)
+
         # the self.ship instance is assigned to give Ship access to all game resourses via self parameter
         self.ship = Ship(self)
         self.bullets = pygame.sprite.Group() # similar to a list with extra features
@@ -35,19 +42,19 @@ class AlienInvasion:
         self.aliens = pygame.sprite.Group()
         self._create_fleet()
 
-        # create instance of laser_blast
-        self.laser = pygame.sprite.Group()
+# # create instance of laser_blast
+# self.laser = pygame.sprite.Group()
 
     def run_game(self):
         """Start main loop in game"""
         while True:
             self._check_events()  # check event listener
             self.ship.update()  # update position
-            self.bullets.update()  # will update each sprite in the group
+           # self.bullets.update()  # will update each sprite in the group
             self._update_bullets()    
             self._update_aliens()
 
-            self.laser.update()
+#            self.laser.update()
             self._update_screen() # refresh screen
 
     def _check_events(self):
@@ -62,7 +69,7 @@ class AlienInvasion:
    
     def _check_keydown_events(self, event):
         """ Set directions for current movements """
-        print('key pressed was ', (event))
+        # print('key pressed was ', (event))
         if event.key == pygame.K_RIGHT:
             self.ship.moving_right = True  # move ship to the right
         elif event.key == pygame.K_LEFT:
@@ -71,8 +78,8 @@ class AlienInvasion:
             sys.exit()    
         elif event.key == pygame.K_SPACE:
             self._fire_bullet()
-        elif event.key == pygame.K_l:
-            self._fire_laser()        
+# elif event.key == pygame.K_l:
+#     self._fire_laser()        
 
     def _check_keyup_events(self, event):
         """ respond to changes in direction """
@@ -89,17 +96,19 @@ class AlienInvasion:
 
     def _fire_laser(self):
         print("LASER FIRED")
-        print(self.settings.laser_fire_allowed)
-        if self.settings.laser_fire_allowed:
-            #laser_blast = LaserBlast(self)
-            laser_blast = Bullet(self)
-            
-            laser_blast.color = self.settings.laser_color
-            self.bullets.add(laser_blast)
+# print(self.settings.laser_fire_allowed)
+# if self.settings.laser_fire_allowed:
+#     #laser_blast = LaserBlast(self)
+#     laser_blast = Bullet(self)
+
+#     laser_blast.color = self.settings.laser_color
+#     self.bullets.add(laser_blast)
 
     def _update_bullets(self):
         """  Update position of bullets to get rid of bullets that have exited screen """
         # Remove bullets that have reached top of screen
+        self.bullets.update()    ## MOVED HERE !!!!!!
+        
         for bullet in self.bullets.copy():
             if bullet.rect.bottom <= 0:
                 self.bullets.remove(bullet)
@@ -111,9 +120,9 @@ class AlienInvasion:
         """ Handles hits to fleet """
         collisions = pygame.sprite.groupcollide(self.bullets, self.aliens, True, True)
         
-        # print out collisions dictionary
-        for item in collisions:
-            print("key = {}, value = {}".format(item, collisions[item]))
+        # # print out collisions dictionary
+        # for item in collisions:
+        #     print("key = {}, value = {}".format(item, collisions[item]))
 
         if not self.aliens:
             # Destroy bullets and create new fleet
@@ -125,6 +134,10 @@ class AlienInvasion:
         self._check_fleet_edges()
 
         self.aliens.update()
+        if pygame.sprite.spritecollideany(self.ship, self.aliens) != None :
+            print("SHIP Hit !")
+
+    
 
     def _create_fleet(self):
         """ Create a fleet of aliens """
@@ -169,11 +182,11 @@ class AlienInvasion:
         """ Determine if fleet hits edge of screen and respond  """
         for alien in self.aliens.sprites():
             if alien.check_edges():
-                print("alien.check_edges x , y", alien.rect) # rect = <rect(x, y, width, height)> 
-                print("direction BEFORE ", self.settings.fleet_direction)
+               # print("alien.check_edges x , y", alien.rect) # rect = <rect(x, y, width, height)> 
+                #print("direction BEFORE ", self.settings.fleet_direction)
                 self._change_fleet_direction()
-                print("direction AFTER ", self.settings.fleet_direction)
-                print("Change in y is ", alien.rect.y)
+                #print("direction AFTER ", self.settings.fleet_direction)
+                #print("Change in y is ", alien.rect.y)
                 break
 
     def _change_fleet_direction(self):
@@ -194,8 +207,8 @@ class AlienInvasion:
         # call draw method to render alien
         self.aliens.draw(self.screen)
 
-        for blast in self.laser.sprites():
-            blast.draw_laser()
+# for blast in self.laser.sprites():
+#     blast.draw_laser()
 
         # make most recent screen drawn visible
         # updates entire display
