@@ -5,8 +5,9 @@ import pygame
 
 from settings import Settings
 from ship import Ship
-from bullet import Bullet
+from weapons import Bullet
 from alien import Alien
+from laser import LaserBlast
 
 class AlienInvasion:
     
@@ -34,6 +35,9 @@ class AlienInvasion:
         self.aliens = pygame.sprite.Group()
         self._create_fleet()
 
+        # create instance of laser_blast
+        self.laser = pygame.sprite.Group()
+
     def run_game(self):
         """Start main loop in game"""
         while True:
@@ -43,6 +47,7 @@ class AlienInvasion:
             self._update_bullets()    
             self._update_aliens()
 
+            self.laser.update()
             self._update_screen() # refresh screen
 
     def _check_events(self):
@@ -65,7 +70,9 @@ class AlienInvasion:
         elif event.key == pygame.K_q:      # quit is Q is pressed
             sys.exit()    
         elif event.key == pygame.K_SPACE:
-            self._fire_bullet()    
+            self._fire_bullet()
+        elif event.key == pygame.K_l:
+            self._fire_laser()        
 
     def _check_keyup_events(self, event):
         """ respond to changes in direction """
@@ -80,19 +87,33 @@ class AlienInvasion:
             new_bullet = Bullet(self)
             self.bullets.add(new_bullet)
 
+    def _fire_laser(self):
+        print("LASER FIRED")
+        print(self.settings.laser_fire_allowed)
+        if self.settings.laser_fire_allowed:
+            #laser_blast = LaserBlast(self)
+            laser_blast = Bullet(self)
+            
+            laser_blast.color = self.settings.laser_color
+            self.bullets.add(laser_blast)
+
     def _update_bullets(self):
         """  Update position of bullets to get rid of bullets that have exited screen """
         # Remove bullets that have reached top of screen
         for bullet in self.bullets.copy():
             if bullet.rect.bottom <= 0:
                 self.bullets.remove(bullet)
-            print(len(self.bullets)) 
+            # print(len(self.bullets)) 
 
         self._check_bullet_alien_collisions()
 
     def _check_bullet_alien_collisions(self):
         """ Handles hits to fleet """
         collisions = pygame.sprite.groupcollide(self.bullets, self.aliens, True, True)
+        
+        # print out collisions dictionary
+        for item in collisions:
+            print("key = {}, value = {}".format(item, collisions[item]))
 
         if not self.aliens:
             # Destroy bullets and create new fleet
@@ -148,7 +169,7 @@ class AlienInvasion:
         """ Determine if fleet hits edge of screen and respond  """
         for alien in self.aliens.sprites():
             if alien.check_edges():
-                print("alien.check_edges x , y", alien.rect)
+                print("alien.check_edges x , y", alien.rect) # rect = <rect(x, y, width, height)> 
                 print("direction BEFORE ", self.settings.fleet_direction)
                 self._change_fleet_direction()
                 print("direction AFTER ", self.settings.fleet_direction)
@@ -172,6 +193,9 @@ class AlienInvasion:
 
         # call draw method to render alien
         self.aliens.draw(self.screen)
+
+        for blast in self.laser.sprites():
+            blast.draw_laser()
 
         # make most recent screen drawn visible
         # updates entire display

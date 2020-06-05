@@ -12,7 +12,7 @@ class Settings:
         self.bullet_speed = 2.0
         self.bullet_width = 3
         self.bullet_height = 15
-        self.bullet_color = (60,60,60)
+        self.bullet_color = (60,60,60)       # (60,60,60)
         self.bullets_allowed = 3
 
         # Alien settings
@@ -20,3 +20,10 @@ class Settings:
         self.fleet_drop_speed = 10
         # fleet direction   `1 is to the right` & `-1 is to the left`
         self.fleet_direction = 1
+
+        # Laser Blast settings
+        self.laser_speed = 10.0
+        self.laser_width = 5
+        self.laser_height = 400
+        self.laser_color = (10,210,50)
+        self.laser_fire_allowed = True
