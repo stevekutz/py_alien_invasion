@@ -26,11 +26,17 @@ class Alien(Sprite):
 
     def check_edges(self):
         screen_rect = self.screen.get_rect()
+        # print(" BEFORE self.rect.right ", self.rect.right)
+        # print(" BEFORE screen_rect.right ", screen_rect.right)
+
         if self.rect.right >= screen_rect.right or self.rect.left <= 0:
+            print(" \t NOW self.rect.right ", self.rect.right)
+            print(" \t NOW screen_rect.right ", screen_rect.right)
+            print("    \t NOW self.rect.left ", self.rect.left)
             return True
 
     def update(self):
-        """ Move alien to the right """
+        """ Move alien to the right and left """
         self.x += (self.settings.alien_speed * self.settings.fleet_direction)
         self.rect.x = self.x
 

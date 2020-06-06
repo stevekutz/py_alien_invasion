@@ -1,6 +1,6 @@
 import sys
 
-from time import sleep
+from game_stats import GameStats
 
 import pygame
 # from pygame.locals import *
@@ -181,12 +181,13 @@ class AlienInvasion:
     def _check_fleet_edges(self):
         """ Determine if fleet hits edge of screen and respond  """
         for alien in self.aliens.sprites():
+            #  if self.rect.right >= screen_rect.right or self.rect.left <= 0:
             if alien.check_edges():
-               # print("alien.check_edges x , y", alien.rect) # rect = <rect(x, y, width, height)> 
-                #print("direction BEFORE ", self.settings.fleet_direction)
+                print("alien.rect BEFORE", alien.rect) # rect = <rect(x, y, width, height)> 
+                print("direction BEFORE ", self.settings.fleet_direction)
                 self._change_fleet_direction()
-                #print("direction AFTER ", self.settings.fleet_direction)
-                #print("Change in y is ", alien.rect.y)
+                print("direction AFTER ", self.settings.fleet_direction)
+                print("Change in y is ", alien.rect.y)
                 break
 
     def _change_fleet_direction(self):
