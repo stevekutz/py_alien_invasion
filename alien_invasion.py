@@ -1,6 +1,7 @@
 import sys
 
 from game_stats import GameStats
+from time import sleep
 
 import pygame
 # from pygame.locals import *
@@ -136,8 +137,28 @@ class AlienInvasion:
         self.aliens.update()
         if pygame.sprite.spritecollideany(self.ship, self.aliens) != None :
             print("SHIP Hit !")
+            self._ship_hit()
 
-    
+    def _ship_hit(self):
+        """ Respond to ship being hit by alien """
+        # Decrement ships_left
+        self.stats.ships_left -= 1
+
+        # Remove remianing aliens & bullets
+        self.aliens.empty()
+        self.bullets.empty()
+
+        # Create new fleet and ship at start location
+        self._create_fleet()
+        self.ship.center_ship()
+
+        # Pause
+        sleep(0.5)
+
+    def center_ship(self):
+        """ Center ship on screen """
+        self.rect.midbottom = self.screen_rect.midbottom
+        self.x = float(self.rect.x)
 
     def _create_fleet(self):
         """ Create a fleet of aliens """

@@ -569,11 +569,49 @@ python3 -m pip install -U pygame==2.0.0.dev6 --user
     ~~~
 
 4) Update `alien_invasion.py`
+- import `GameStats` & `sleep`
+- create instance with in `__init__`
+    ~~~ py
+    ...
+    from game_stats import GameStats
+    from time import slee
+    ...
+        pygame.display.set_caption("Alien_Invasion")
 
-~~~ py
-...
-from game_stats import GameStats
+        # Create isntance of game statistics
+        self.stats = GameStats(self)
+    ...
+    ~~~
 
-from game_stats import GameStats
-...
-~~~
+5) Create `_ship_hit` method
+
+    ~~~ py
+    def ship_hit(self):
+    """ Respond to ship being hit by alien """
+    # Decrement ships_left
+    self.stats.ships_left -= 1
+
+    # Remove remianing aliens & bullets
+    self.aliens.empty()
+    self.bullets.empty()
+
+    # Create new fleet and ship at start location
+    self._create_fleet()
+    self.ship.center_ship()
+
+    # Pause
+    sleep(0.5)
+    ~~~
+
+6) Add `_ship_hit` & `center_ship` method to `update_aliens`
+
+    ~~~ py
+    def _update_aliens(self):
+    """ Verify if fleet at edges. if so, change position of fleet """
+    self._check_fleet_edges()
+
+    self.aliens.update()
+    if pygame.sprite.spritecollideany(self.ship, self.aliens) != None :
+        print("SHIP Hit !")
+        self._ship_hit()
+    ~~~
