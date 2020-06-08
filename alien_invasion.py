@@ -13,6 +13,7 @@ from alien import Alien
 # from laser import LaserBlast
 
 from game_stats import GameStats
+from button import Button
 
 class AlienInvasion:
     
@@ -42,6 +43,9 @@ class AlienInvasion:
         # create instance of alien
         self.aliens = pygame.sprite.Group()
         self._create_fleet()
+
+        # Create a Play button
+        self.play_button = Button(self, "Play !")
 
 # # create instance of laser_blast
 # self.laser = pygame.sprite.Group()
@@ -240,6 +244,10 @@ class AlienInvasion:
 
         # call draw method to render alien
         self.aliens.draw(self.screen)
+
+        # Draw the play button if the game is inactive
+        if not self.stats.game_active:
+            self.play_button.draw_button()
 
 # for blast in self.laser.sprites():
 #     blast.draw_laser()

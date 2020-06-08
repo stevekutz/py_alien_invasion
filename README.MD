@@ -535,7 +535,7 @@ python3 -m pip install -U pygame==2.0.0.dev6 --user
                 self._create_fleet() 
     ~~~
 
-#### Set up game scoring
+#### Set up how game ends
 
 1) Add the following to `_update_aliens` to check for alien-ship collisions
 
@@ -553,6 +553,7 @@ python3 -m pip install -U pygame==2.0.0.dev6 --user
     ~~~
 
 2) Create a new file `game_stats.py`
+- the `game_active` flag is used to control game 
     ~~~ py
     class GameStats:
         """ Track statistics for alien invasion  """
@@ -560,6 +561,7 @@ python3 -m pip install -U pygame==2.0.0.dev6 --user
         def __init__(self, ai_game):
             self.settings = ai_game.settings 
             self.reset_stats()
+            self.game_active = True
         
         def reset_stats(self):
             self.ships_left = self.settings.ship_limit
@@ -588,7 +590,7 @@ python3 -m pip install -U pygame==2.0.0.dev6 --user
     ...
     ~~~
 
-1) Create `_ship_hit` method
+5) Create `_ship_hit` method
 
     ~~~ py
     def _ship_hit(self):
@@ -611,7 +613,7 @@ python3 -m pip install -U pygame==2.0.0.dev6 --user
             self.stats.game_active = False  
     ~~~
 
-2) Add `_ship_hit` method to `update_aliens`
+6) Add `_ship_hit` method to `update_aliens`
 
     ~~~ py
     def _update_aliens(self):
@@ -624,7 +626,7 @@ python3 -m pip install -U pygame==2.0.0.dev6 --user
         self._ship_hit()
     ~~~
 
-3) Add `center_ship` method to `ship.py`
+7) Add `center_ship` method to `ship.py`
 
     ~~~ py
         def center_ship(self):
@@ -633,7 +635,7 @@ python3 -m pip install -U pygame==2.0.0.dev6 --user
             self.x = float(self.rect.x)
     ~~~
 
-4) Add `_check_aliens_bottom` to `alien_invasion`
+8) Add `_check_aliens_bottom` to `alien_invasion`
 
     ~~~ py
         def _check_aliens_bottom(self):
@@ -645,7 +647,7 @@ python3 -m pip install -U pygame==2.0.0.dev6 --user
                     break
     ~~~
 
-5) Add call to `_check_aliens_bottom` to `update_aliens` method
+9) Add call to `_check_aliens_bottom` to `update_aliens` method
 
     ~~~ py
         def _update_aliens(self):
@@ -661,4 +663,60 @@ python3 -m pip install -U pygame==2.0.0.dev6 --user
             self._check_aliens_bottom() 
     ~~~
 
-6)  Add flag to `__init__ `    
+#### Game Scoring
+1) Set `game_active` flag in `GameStats` to False
+
+2) Create a `Button` class in new file `button.py`
+
+    ~~~ py
+    import pygame.font
+
+    class Button:
+
+        def __init__(self, ai_game, msg):
+            """ Initialize button attributes """
+            self.screen = ai_game.screen
+            self.screen_rect = self.screen.get_rect()
+
+            # Set dimensions of button
+            self.width, self.height = 200, 50
+            self.button_color = (0, 255, 0)
+            self.text_color = (255, 255, 255)
+            self.font = pygame.font.SysFont(None, 48)
+
+            # Build button rect obj
+            self.rect = pygame.Rect(0, 0, self.width, self.height)
+            self.rect.center = self.screen_rect.center
+
+            # Show button message only once
+            self._prep_msg(msg)
+
+        def _prep_msg(self, msg):
+            """ Turn msg into a rendered image and enter text on the button """
+            self.msg_image = self.font.render(msg, True, self.text_color, self.button_color)
+            self.msg_image_rect = self.msg_image.get_rect()
+            self.msg_image_rect.center = self.rect.center
+
+        def draw_button(self):
+            """ Draw a blank button and show message """
+            self.screen.fill(self.button_color, self.rect)
+            self.screen.blit(self.msg_image, self.msg_image_rect)
+    ~~~
+
+3) Create instance of button inside `__init__` of `alien_invasion.py`
+   - Create instance of button inside `__init__`
+   ~~~ py
+       # create instance of alien
+       self.aliens = pygame.sprite.Group()
+       self._create_fleet()
+
+       # Create a Play button
+       self.play_button = Button(self, "Play !")
+   ~~~
+- Add the logic to show button inside the `update_screen` method
+
+    ~~~ py
+        # Draw the play button if the game is inactive
+        if not self.stats.game_active:
+        self.play_button.draw_button()
+    ~~~
