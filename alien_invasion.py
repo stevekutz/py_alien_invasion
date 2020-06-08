@@ -50,10 +50,12 @@ class AlienInvasion:
         """Start main loop in game"""
         while True:
             self._check_events()  # check event listener
-            self.ship.update()  # update position
-           # self.bullets.update()  # will update each sprite in the group
-            self._update_bullets()    
-            self._update_aliens()
+           
+            if self.stats.game_active:
+                self.ship.update()  # update position
+                # self.bullets.update()  # will update each sprite in the group
+                self._update_bullets()    
+                self._update_aliens()
 
 #            self.laser.update()
             self._update_screen() # refresh screen
@@ -139,26 +141,27 @@ class AlienInvasion:
             print("SHIP Hit !")
             self._ship_hit()
 
+        # Verify if aliens reach the bottom of the screen
+        self._check_aliens_bottom()    
+
     def _ship_hit(self):
         """ Respond to ship being hit by alien """
-        # Decrement ships_left
-        self.stats.ships_left -= 1
+        if self.stats.ships_left > 0:
+            # Decrement ships_left
+            self.stats.ships_left -= 1
 
-        # Remove remianing aliens & bullets
-        self.aliens.empty()
-        self.bullets.empty()
+            # Remove remianing aliens & bullets
+            self.aliens.empty()
+            self.bullets.empty()
 
-        # Create new fleet and ship at start location
-        self._create_fleet()
-        self.ship.center_ship()
+            # Create new fleet and ship at start location
+            self._create_fleet()
+            self.ship.center_ship()
 
-        # Pause
-        sleep(0.5)
-
-    def center_ship(self):
-        """ Center ship on screen """
-        self.rect.midbottom = self.screen_rect.midbottom
-        self.x = float(self.rect.x)
+            # pause
+            sleep(0.5)
+        else:
+            self.stats.game_active = False    
 
     def _create_fleet(self):
         """ Create a fleet of aliens """
@@ -216,6 +219,15 @@ class AlienInvasion:
         for alien in self.aliens.sprites():
             alien.rect.y += self.settings.fleet_drop_speed
         self.settings.fleet_direction *= -1          
+
+    def _check_aliens_bottom(self):
+        """ Verify if aliends reach bottom od screen """
+        screen_rect = self.screen.get_rect()
+        for alien in self.aliens.sprites():
+            if alien.rect.bottom >= screen_rect.bottom:
+                self._ship_hit()
+                break
+
 
     def _update_screen(self):
         """ Update images """

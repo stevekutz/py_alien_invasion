@@ -538,14 +538,18 @@ python3 -m pip install -U pygame==2.0.0.dev6 --user
 #### Set up game scoring
 
 1) Add the following to `_update_aliens` to check for alien-ship collisions
-    ~~~ py
-        def _update_aliens(self):
-            """ Verify if fleet at edges. if so, change position of fleet """
-            self._check_fleet_edges()
 
-            self.aliens.update()
-            if pygame.sprite.spritecollideany(self.ship, self.aliens) != None :
-                print("SHIP Hit !")
+    ~~~ py
+    class GameStats:
+        """ Track statistics for alien invasion  """
+
+        def __init__(self, ai_game):
+            self.settings = ai_game.settings 
+            self.reset_stats()
+            self.game_active = True
+
+        def reset_stats(self):
+            self.ships_left = self.settings.ship_limit
     ~~~
 
 2) Create a new file `game_stats.py`
@@ -571,6 +575,7 @@ python3 -m pip install -U pygame==2.0.0.dev6 --user
 4) Update `alien_invasion.py`
 - import `GameStats` & `sleep`
 - create instance with in `__init__`
+  
     ~~~ py
     ...
     from game_stats import GameStats
@@ -578,32 +583,35 @@ python3 -m pip install -U pygame==2.0.0.dev6 --user
     ...
         pygame.display.set_caption("Alien_Invasion")
 
-        # Create isntance of game statistics
+        # Create instance of game statistics
         self.stats = GameStats(self)
     ...
     ~~~
 
-5) Create `_ship_hit` method
+1) Create `_ship_hit` method
 
     ~~~ py
-    def ship_hit(self):
-    """ Respond to ship being hit by alien """
-    # Decrement ships_left
-    self.stats.ships_left -= 1
+    def _ship_hit(self):
+        """ Respond to ship being hit by alien """
+        if self.stats.ships_left > 0:
+            # Decrement ships_left
+            self.stats.ships_left -= 1
 
-    # Remove remianing aliens & bullets
-    self.aliens.empty()
-    self.bullets.empty()
+            # Remove remaining aliens & bullets
+            self.aliens.empty()
+            self.bullets.empty()
 
-    # Create new fleet and ship at start location
-    self._create_fleet()
-    self.ship.center_ship()
+            # Create new fleet and ship at start location
+            self._create_fleet()
+            self.ship.center_ship()
 
-    # Pause
-    sleep(0.5)
+            # pause
+            sleep(0.5)
+        else:
+            self.stats.game_active = False  
     ~~~
 
-6) Add `_ship_hit` & `center_ship` method to `update_aliens`
+2) Add `_ship_hit` method to `update_aliens`
 
     ~~~ py
     def _update_aliens(self):
@@ -615,3 +623,42 @@ python3 -m pip install -U pygame==2.0.0.dev6 --user
         print("SHIP Hit !")
         self._ship_hit()
     ~~~
+
+3) Add `center_ship` method to `ship.py`
+
+    ~~~ py
+        def center_ship(self):
+            """ Center ship on screen """
+            self.rect.midbottom = self.screen_rect.midbottom
+            self.x = float(self.rect.x)
+    ~~~
+
+4) Add `_check_aliens_bottom` to `alien_invasion`
+
+    ~~~ py
+        def _check_aliens_bottom(self):
+            """ Verify if aliends reach bottom od screen """
+            screen_rect = self.screen.get_rect()
+            for alien in self.aliens.sprites():
+                if alien.rect.bottom >= screen_rect.bottom:
+                    self._ship_hit()
+                    break
+    ~~~
+
+5) Add call to `_check_aliens_bottom` to `update_aliens` method
+
+    ~~~ py
+        def _update_aliens(self):
+            """ Verify if fleet at edges. if so, change position of fleet """
+            self._check_fleet_edges()
+
+            self.aliens.update()
+            if pygame.sprite.spritecollideany(self.ship, self.aliens) != None :
+                print("SHIP Hit !")
+                self._ship_hit()
+
+            # Verify if aliens reach the bottom of the screen
+            self._check_aliens_bottom() 
+    ~~~
+
+6)  Add flag to `__init__ `    
