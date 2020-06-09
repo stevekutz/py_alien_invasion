@@ -79,8 +79,25 @@ class AlienInvasion:
 
     def _check_play_button(self, mouse_pos):
         """ Start a new game when player clicks Play """ 
-        if self.play_button.rect.collidepoint(mouse_pos):
-            self.stats.game_active = True           
+        button_clicked = self.play_button.rect.collidepoint(mouse_pos)
+        if button_clicked and not self.stats.game_active:
+            # Reset game settings
+            self.settings.initialize_dynamic_settings()
+
+            # Reset game stats
+            self.stats.reset_stats()
+            self.stats.game_active = True
+
+            # Remove any remaining aliends and bullets
+            self.aliens.empty()       
+            self.bullets.empty()
+
+            # Create new fleet and center the ship
+            self._create_fleet()
+            self.ship.center_ship()   
+
+            # Hide the mouse cursor when inside of game window
+            pygame.mouse.set_visible(False) 
    
     def _check_keydown_events(self, event):
         """ Set directions for current movements """
@@ -143,6 +160,7 @@ class AlienInvasion:
             # Destroy bullets and create new fleet
             self.bullets.empty()
             self._create_fleet()    
+            self.settings.increase_speed()
 
     def _update_aliens(self):
         """ Verify if fleet at edges. if so, change position of fleet """
@@ -173,7 +191,8 @@ class AlienInvasion:
             # pause
             sleep(0.5)
         else:
-            self.stats.game_active = False    
+            self.stats.game_active = False   
+            pygame.mouse.set_visible(True) 
 
     def _create_fleet(self):
         """ Create a fleet of aliens """
@@ -190,7 +209,7 @@ class AlienInvasion:
             # available_space_y = (800) - (3 * 58) - 48    = 578
             # available_space_x = 1200 - (2 * 60)    = 1080
 
-        # detemine total number of aliens per row & total number of rows 
+        # determine total number of aliens per row & total number of rows 
         number_aliens_x = available_space_x // ( 2 * alien_width )
         number_rows = available_space_y // ( 2 * alien_height )
             # number_aliens_x = 1080 // (2 * 60)   = 9

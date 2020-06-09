@@ -412,7 +412,7 @@ python3 -m pip install -U pygame==2.0.0.dev6 --user
             # available_space_y = (800) - (3 * 58) - 48    = 578
             # available_space_x = 1200 - (2 * 60)    = 1080
 
-        # detemine total number of aliens per row & total number of rows 
+        # determine total number of aliens per row & total number of rows 
         number_aliens_x = available_space_x // ( 2 * alien_width )
         number_rows = available_space_y // ( 2 * alien_height )
             # number_aliens_x = 1080 // (2 * 60)   = 9
@@ -663,7 +663,7 @@ python3 -m pip install -U pygame==2.0.0.dev6 --user
             self._check_aliens_bottom() 
     ~~~
 
-#### Game Scoring
+#### Adding Play Button
 1) Set `game_active` flag in `GameStats` to False
 
 2) Create a `Button` class in new file `button.py`
@@ -746,11 +746,110 @@ python3 -m pip install -U pygame==2.0.0.dev6 --user
 5) Add `_check_play_button` method
 - the `collidepoint` method verifies if the location of the play button coincides with the mouse click location
 - if the same, `game_active` set to True
+- The area where the play button is located will not react to mouse clicks once the game starts
+- the mouse cursor becomes invisible when inside an active game
+
+    ~~~ py
+    def _check_play_button(self, mouse_pos):
+        """ Start a new game when player clicks Play """ 
+        button_clicked = self.play_button.rect.collidepoint(mouse_pos)
+        if button_clicked and not self.stats.game_active:
+            # Reset game stats
+            self.stats.reset_stats()
+            self.stats.game_active = True
+
+            # Remove any remaining aliens and bullets
+            self.aliens.empty()       
+            self.bullets.empty()
+
+            # Create new fleet and center the ship
+            self._create_fleet()
+            self.ship.center_ship()   
+
+            # Hide the mouse cursor when inside of game window
+            pygame.mouse.set_visible(False)
+    ~~~
+
+6) Modify the end of `_ship_hit` to make mouse visible again at the end of a game
+
+    ~~~ py
+        def _ship_hit(self):
+            """ Respond to ship being hit by alien """
+            if self.stats.ships_left > 0:
+                # Decrement ships_left
+                self.stats.ships_left -= 1
+
+                # Remove remianing aliens & bullets
+                self.aliens.empty()
+                self.bullets.empty()
+
+                # Create new fleet and ship at start location
+                self._create_fleet()
+                self.ship.center_ship()
+
+                # pause
+                sleep(0.5)
+            else:
+                self.stats.game_active = False   
+                pygame.mouse.set_visible(True) 
+    ~~~
+
+#### Changing Level Behavior
+1)  Modify `settings.py`
+- add `speedup_scale` attribute
+
+    ~~~ py
+        # Game speedup
+        self.speedup_scale = 1.2
+    ~~~
+
+- add `initialize_dynamic_settings` & `increase_speed`
+- Note that `fleet_direction` is added to keep aliens always starting toward right
+
+    ~~~ py
+        self.initialize_dynamic_settings()
+
+        def initialize_dynamic_settings(self):
+            """ Initialize settings that change during gameplay """
+            self.ship_speed = 1.5
+            self.bullet_speed = 3.0
+            self.alien_speed = 1.0
+
+            # fleet direction   `1 is to the right` & `-1 is to the left`
+            self.fleet_direction = 1
+
+        def increase_speed(self):
+            """ Increase speed settings """
+            self.ship_speed *= self.speedup_scale
+            self.bullet_speed *= self.speedup_scale
+            self.alien_speed *= self.speedup_scale
+    ~~~
+
+2) Within `alien_invasion` add `increase_speed` call 
+
+    ~~~ py
+    def _check_bullet_alien_collisions(self):
+        """ Handles hits to fleet """
+        collisions = pygame.sprite.groupcollide(self.bullets, self.aliens, True, True)
+        
+        # # print out collisions dictionary
+        # for item in collisions:
+        #     print("key = {}, value = {}".format(item, collisions[item]))
+
+        if not self.aliens:
+            # Destroy bullets and create new fleet
+            self.bullets.empty()
+            self._create_fleet()    
+            self.settings.increase_speed()
+    ~~~
+
+3) Add `initialize_dynamic_settings` to `_check_play_button` in `alien_invasion`
+
     ~~~ py
         def _check_play_button(self, mouse_pos):
             """ Start a new game when player clicks Play """ 
-            if self.play_button.rect.collidepoint(mouse_pos):
-                self.stats.game_active = True    
+            button_clicked = self.play_button.rect.collidepoint(mouse_pos)
+            if button_clicked and not self.stats.game_active:
+                # Reset game settings
+                self.settings.initialize_dynamic_settings()
     ~~~
-
-    
