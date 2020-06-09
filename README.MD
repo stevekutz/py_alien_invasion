@@ -705,6 +705,7 @@ python3 -m pip install -U pygame==2.0.0.dev6 --user
 
 3) Create instance of button inside `__init__` of `alien_invasion.py`
    - Create instance of button inside `__init__`
+
    ~~~ py
        # create instance of alien
        self.aliens = pygame.sprite.Group()
@@ -712,7 +713,9 @@ python3 -m pip install -U pygame==2.0.0.dev6 --user
 
        # Create a Play button
        self.play_button = Button(self, "Play !")
+
    ~~~
+
 - Add the logic to show button inside the `update_screen` method
 
     ~~~ py
@@ -720,3 +723,34 @@ python3 -m pip install -U pygame==2.0.0.dev6 --user
         if not self.stats.game_active:
         self.play_button.draw_button()
     ~~~
+
+4) Add a check for `MOUSEBUTTONDOWN` in `_check_events`
+- the position of the mouse if assigned to `mouse_pos`
+- this location is then compared to Play button location in `_check_play_button` defined in 5)
+
+    ~~~ py
+        def _check_events(self):
+            # create event listener to watch keyboard or mouse events
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    sys.exit()
+                elif event.type == pygame.KEYDOWN:
+                    self._check_keydown_events(event)
+                elif event.type == pygame.KEYUP:
+                    self._check_keyup_events(event)
+                elif event.type == pygame.MOUSEBUTTONDOWN:
+                    mouse_pos = pygame.mouse.get_pos()
+                    self._check_play_button(mouse_pos)
+    ~~~
+
+5) Add `_check_play_button` method
+- the `collidepoint` method verifies if the location of the play button coincides with the mouse click location
+- if the same, `game_active` set to True
+    ~~~ py
+        def _check_play_button(self, mouse_pos):
+            """ Start a new game when player clicks Play """ 
+            if self.play_button.rect.collidepoint(mouse_pos):
+                self.stats.game_active = True    
+    ~~~
+
+    
