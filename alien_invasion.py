@@ -159,8 +159,9 @@ class AlienInvasion:
         if collisions:
             for aliens in collisions.values():
                 print(f' Collision values() is {aliens}')
-                self.stats.score += self.settings.alien_points
+                self.stats.score += self.settings.alien_points * len(aliens)
             self.sb.prep_score()
+            self.sb.check_high_score()
 
         # # print out collisions dictionary
         # for item in collisions:

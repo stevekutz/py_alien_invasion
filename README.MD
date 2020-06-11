@@ -880,11 +880,11 @@ python3 -m pip install -U pygame==2.0.0.dev6 --user
             self.settings = ai_game.settings
             self.stats = ai_game.stats
 
-            # Font settings for scorring info   
+            # Font settings for scoring info   
             self.text_color = (30, 30, 30)
             self.font = pygame.font.SysFont(None, 48)
 
-            # Prepare the intial score image
+            # Prepare the initial score image
             self.prep_score()
 
 
@@ -970,7 +970,7 @@ python3 -m pip install -U pygame==2.0.0.dev6 --user
         if collisions:
             for aliens in collisions.values():
                 print(f' Collision values() is {aliens}')
-                self.stats.score += self.settings.alien_points
+                self.stats.score += self.settings.alien_points * len(aliens)
             self.sb.prep_score()
    ~~~
 
@@ -1001,3 +1001,74 @@ python3 -m pip install -U pygame==2.0.0.dev6 --user
            score_str = "{:,}".format(rounded_score)    # convert to string for display
            self.score_image = self.font.render(score_str, True, self.text_color, self.settings.bg_color)
    ~~~
+
+#### Set up saving High Score
+
+- move `self.score = 0` from `reset_stats` to the the `__init__` method in `game_stats.py`
+- add `high_score` to the `__init__` method
+    ~~~ py
+    def __init__(self, ai_game):
+        self.settings = ai_game.settings 
+        self.reset_stats()
+        self.game_active = False
+        self.score = 0
+        self.high_score = 0
+    ~~~
+
+- add attribute for storing high score attribute within `__init__` method in `scoreboard.py`
+
+    ~~~ py
+    # Prepare the initial score image
+    self.prep_score()
+    self.prep_high_score()
+    ~~~
+
+  - add `prep_high_score` method to `scoreboard.py`
+
+  ~~~ py
+  def prep_high_score(self):
+      """ Turn the high score into a rendered image """
+      high_score = round(self.stats.high_score, -1)
+      high_score_str = "{:,}".format(high_score)
+      self.high_score_image = self.font.render(high_score_str, True, self.text_color, self.settings.bg_color)
+
+      # Center high score at top of screen
+      self.high_score_rect = self.high_score_image.get_rect()
+      self.high_score_rect.centerx = self.screen_rect.centerx
+      self.high_score_rect.top = self.score_rect.top   
+  ~~~
+
+    - add the high score to the `show_score`  method
+
+    ~~~ py
+        def show_score(self):
+            """ Draw score to the screen """    
+            self.screen.blit(self.score_image, self.score_rect)
+            self.screen.blit(self.high_score_image, self.high_score_rect)
+    ~~~
+
+  - add the `check_high_score` method
+
+
+  ~~~ py
+      def check_high_score(self):
+          """ Cherck for new high score """    
+          if self.stats.score > self.stats.high_score:
+              self.stats.high_score = self.stats.score
+              self.prep_high_score()
+  ~~~
+
+  - add `check_high_score` to the `_check_bullet_alein_collisions` in `alien_invasion.py`
+
+  ~~~ py
+  def _check_bullet_alien_collisions(self):
+    """ Handles hits to fleet """
+    collisions = pygame.sprite.groupcollide(self.bullets, self.aliens, True, True)
+    
+    if collisions:
+        for aliens in collisions.values():
+            print(f' Collision values() is {aliens}')
+            self.stats.score += self.settings.alien_points
+        self.sb.prep_score()
+        self.sb.check_high_score()
+  ~~~
