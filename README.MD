@@ -25,57 +25,57 @@ python3 -m pip install -U pygame==2.0.0.dev6 --user
 
 1) Create `alien_invasion.py` 
 
-- import `sys` (allows exiting of game) & `pygame` (contains game functionality) 
-- pygame allows `FULLSCREEN` mode
-    ~~~ py
-    import sys
+   - import `sys` (allows exiting of game) & `pygame` (contains game functionality) 
+   - pygame allows `FULLSCREEN` mode
+       ~~~ py
+       import sys
 
-    import pygame
-    # from pygame.locals import *
+       import pygame
+       # from pygame.locals import *
 
-    from settings import Settings
+       from settings import Settings
 
-    class AlienInvasion:
-        
-        def __init__(self):
-            "Initialize game & resources"
-            pygame.init()   # intializes background settings
-            self.settings = Settings()
+       class AlienInvasion:
+           
+           def __init__(self):
+               "Initialize game & resources"
+               pygame.init()   # intializes background settings
+               self.settings = Settings()
 
-        # the self.screen obj creates a `surface` that represents game screen where elements can be drawn
-        ###  run in 1200 x 800 mode
-        # self.screen = pygame.display.set_mode((self.settings.screen_width, self.settings.screen_height)) 
-        
-        ### run in fullscreen mode
-        self.screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
-        self.settings.screen_width = self.screen.get_rect().width
-        self.settings.screen_height = self.screen.get_rect().height
-            pygame.display.set_caption("Alien_Invasion")
+           # the self.screen obj creates a `surface` that represents game screen where elements can be drawn
+           ###  run in 1200 x 800 mode
+           # self.screen = pygame.display.set_mode((self.settings.screen_width, self.settings.screen_height)) 
+           
+           ### run in fullscreen mode
+           self.screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
+           self.settings.screen_width = self.screen.get_rect().width
+           self.settings.screen_height = self.screen.get_rect().height
+               pygame.display.set_caption("Alien_Invasion")
 
-            # set background color
-            self.bg_color = (230, 230, 230)
+               # set background color
+               self.bg_color = (230, 230, 230)
 
-        def run_game(self):
-            "Start main loop in game"
-            while True:
-                # create event listener to watch keyboard or mouse events
-                for event in pygame.event.get():
-                    if event.type == pygame.QUIT:
-                        sys.exit()
+           def run_game(self):
+               "Start main loop in game"
+               while True:
+                   # create event listener to watch keyboard or mouse events
+                   for event in pygame.event.get():
+                       if event.type == pygame.QUIT:
+                           sys.exit()
 
-                # Redraw screen during each pass through the loop
-                # a surface obj is created via self.screen
-                self.screen.fill(self.settings.bg_color)
+                   # Redraw screen during each pass through the loop
+                   # a surface obj is created via self.screen
+                   self.screen.fill(self.settings.bg_color)
 
-                # make most recent screen drawn visible
-                # updates entire display
-                pygame.display.flip()
+                   # make most recent screen drawn visible
+                   # updates entire display
+                   pygame.display.flip()
 
-    if __name__ == '__main__':    
-        # make a game instance & run game
-        ai = AlienInvasion()
-        ai.run_game()
-    ~~~
+       if __name__ == '__main__':    
+           # make a game instance & run game
+           ai = AlienInvasion()
+           ai.run_game()
+       ~~~
 
 2) Create a `Settings` class in `settings.py` 
 
@@ -139,70 +139,70 @@ python3 -m pip install -U pygame==2.0.0.dev6 --user
     ~~~
 
 5) Refactor the `run_game` method
-- `_check_events` and `_update_screen` methods are used to simplify `run_game`
-    ~~~ py
-        def run_game(self):
-            """Start main loop in game"""
-            while True:
-                self._check_events()  # check event listener
-                self._update_screen() # refresh screen
+   - `_check_events` and `_update_screen` methods are used to simplify `run_game`
+       ~~~ py
+           def run_game(self):
+               """Start main loop in game"""
+               while True:
+                   self._check_events()  # check event listener
+                   self._update_screen() # refresh screen
 
+           def _check_events(self):
+               # create event listener to watch keyboard or mouse events
+               for event in pygame.event.get():
+                   if event.type == pygame.QUIT:
+                       sys.exit()
+                   elif event.type == pygame.KEYDOWN:  # detects is any key is pressed
+                       if event.key == pygame.K_RIGHT:
+
+
+           def _update_screen(self):
+               """ Update images """
+               # Redraw screen during each pass through the loop
+               # a surface obj is created via self.screen
+               self.screen.fill(self.settings.bg_color)
+               self.ship.blitme()
+               
+               # make most recent screen drawn visible
+               # updates entire display
+               pygame.display.flip()
+       ~~~
+
+1) Implement ability to move ship
+
+   - modify the `run_game` module to include `self.ship.update()` in `alien_invasion.py`
+
+       ~~~ py
+           def run_game(self):
+               """Start main loop in game"""
+               while True:
+                   self._check_events()  # check event listener
+                   self.ship.update()  # update position
+                   self._update_screen() # refresh screen
+       ~~~
+
+   - update the `_check_events` of `alien_invasion`
+
+    ~~~ py
         def _check_events(self):
             # create event listener to watch keyboard or mouse events
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     sys.exit()
-                elif event.type == pygame.KEYDOWN:  # detects is any key is pressed
+                elif event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_RIGHT:
+                        self.ship.moving_right = True  # move ship to the right
+                    elif event.key == pygame.K_LEFT:
+                        self.ship.moving_left = True   # move ship to the left
 
-
-        def _update_screen(self):
-            """ Update images """
-            # Redraw screen during each pass through the loop
-            # a surface obj is created via self.screen
-            self.screen.fill(self.settings.bg_color)
-            self.ship.blitme()
-            
-            # make most recent screen drawn visible
-            # updates entire display
-            pygame.display.flip()
+                elif event.type == pygame.KEYUP:
+                    if event.key == pygame.K_RIGHT:
+                        self.ship.moving_right = False   # moving right key released, stop moving
+                    elif event.key == pygame.K_LEFT:
+                        self.ship.moving_left = False   # moving left key released, stop moving  
     ~~~
 
-1) Implement ability to move ship
-
-- modify the `run_game` module to include `self.ship.update()` in `alien_invasion.py`
-
-    ~~~ py
-        def run_game(self):
-            """Start main loop in game"""
-            while True:
-                self._check_events()  # check event listener
-                self.ship.update()  # update position
-                self._update_screen() # refresh screen
-    ~~~
-
-- update the `_check_events` of `alien_invasion`
-
-~~~ py
-    def _check_events(self):
-        # create event listener to watch keyboard or mouse events
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                sys.exit()
-            elif event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_RIGHT:
-                    self.ship.moving_right = True  # move ship to the right
-                elif event.key == pygame.K_LEFT:
-                    self.ship.moving_left = True   # move ship to the left
-
-            elif event.type == pygame.KEYUP:
-                if event.key == pygame.K_RIGHT:
-                    self.ship.moving_right = False   # moving right key released, stop moving
-                elif event.key == pygame.K_LEFT:
-                    self.ship.moving_left = False   # moving left key released, stop moving  
-~~~
-
-- add moving left & right functionality to the `update` method of `ship.py`
+   - add moving left & right functionality to the `update` method of `ship.py`
 
 ~~~ py
     def update(self):
@@ -217,37 +217,37 @@ python3 -m pip install -U pygame==2.0.0.dev6 --user
 
 7) Adjust ship speed to use float values
 
-- add `self.settings` to `ship.py`
-    ~~~ py
-    def __init__(self,ai_game):
-            """ Initialize ship to self and instance of current AlienInvasion class  """
-            self.screen = ai_game.screen
-            self.settings = ai_game.settings
-            self.screen_rect = ai_game.screen.get_rect()
-    ~~~
+   - add `self.settings` to `ship.py`
+       ~~~ py
+       def __init__(self,ai_game):
+               """ Initialize ship to self and instance of current AlienInvasion class  """
+               self.screen = ai_game.screen
+               self.settings = ai_game.settings
+               self.screen_rect = ai_game.screen.get_rect()
+       ~~~
 
--  at bottom of `__init__` add `self.x`  
-
-~~~ py
-     # store ship position as float
-     self.x = float(self.rect.x)
-~~~
-
-- improve the `update` method to keep ship on screen in `ship.py`
+   -  at bottom of `__init__` add `self.x`  
 
     ~~~ py
-        def update(self):
-            """ Update the ship position based on the movement flag  """    
-            if self.moving_right and self.rect.right < self.screen_rect.right:
-                # self.rect.x += 1
-                self.x += self.settings.ship_speed
-            if self.moving_left and self.rect.left > 0:
-                # self.rect.x -= 1   
-                self.x -= self.settings.ship_speed      
-
-            # update the rect obj
-            self.rect.x = self.x 
+        # store ship position as float
+        self.x = float(self.rect.x)
     ~~~
+
+   - improve the `update` method to keep ship on screen in `ship.py`
+
+       ~~~ py
+           def update(self):
+               """ Update the ship position based on the movement flag  """    
+               if self.moving_right and self.rect.right < self.screen_rect.right:
+                   # self.rect.x += 1
+                   self.x += self.settings.ship_speed
+               if self.moving_left and self.rect.left > 0:
+                   # self.rect.x -= 1   
+                   self.x -= self.settings.ship_speed      
+
+               # update the rect obj
+               self.rect.x = self.x 
+       ~~~
 
 8) Refactor `_check_events` and add helper methods in `alein_invasion.py`  
 
@@ -357,20 +357,20 @@ python3 -m pip install -U pygame==2.0.0.dev6 --user
 
 2) Update `alien_invaion.py` to render alien
 
-- add import for `Alien` class
+   - add import for `Alien` class
 
-    ~~~ py
-    from bullet import Bullet
-    from alien import Alien
-    ~~~
+       ~~~ py
+       from bullet import Bullet
+       from alien import Alien
+       ~~~
 
-- update  `__init__`
+   - update  `__init__`
 
-    ~~~ py
-    # create instance of alien
-    self.aliens = pygame.sprite.Group()
-    self._create_fleet()
-    ~~~
+       ~~~ py
+       # create instance of alien
+       self.aliens = pygame.sprite.Group()
+       self._create_fleet()
+       ~~~
 
 - create `_create_fleet` method
 
@@ -393,49 +393,49 @@ python3 -m pip install -U pygame==2.0.0.dev6 --user
 
 3) Refactor `alien_invasion.py` to render fleet of aliens
 
-- `_create_fleet` calls upon a helper function `_create_alien`
-- the number of rows and aliens per row is calculated based on whether 800 x 1200 OR FULLSCREEN mode is used
-- debug code is added to see how fleet is rendered
-    ~~~ py
-    def _create_fleet(self):
-        """ Create a fleet of aliens """
-        alien = Alien(self)  # used for calculations, NOT part of fleet
-            # <Alien sprite(in 0 groups)>
+    - `_create_fleet` calls upon a helper function `_create_alien`
+    - the number of rows and aliens per row is calculated based on whether 800 x 1200 OR FULLSCREEN mode is used
+    - debug code is added to see how fleet is rendered
+        ~~~ py
+        def _create_fleet(self):
+            """ Create a fleet of aliens """
+            alien = Alien(self)  # used for calculations, NOT part of fleet
+                # <Alien sprite(in 0 groups)>
 
-        # Get dimensions for ship & alien
-        ship_height = self.ship.rect.height
-        alien_width, alien_height = alien.rect.size   # (60, 58)
-        
-        # find available space for aliens to fit on screen
-        available_space_y = (self.settings.screen_height - (3 * alien_height) - ship_height)
-        available_space_x = self.settings.screen_width - ( 2 * alien_width )
-            # available_space_y = (800) - (3 * 58) - 48    = 578
-            # available_space_x = 1200 - (2 * 60)    = 1080
+            # Get dimensions for ship & alien
+            ship_height = self.ship.rect.height
+            alien_width, alien_height = alien.rect.size   # (60, 58)
+            
+            # find available space for aliens to fit on screen
+            available_space_y = (self.settings.screen_height - (3 * alien_height) - ship_height)
+            available_space_x = self.settings.screen_width - ( 2 * alien_width )
+                # available_space_y = (800) - (3 * 58) - 48    = 578
+                # available_space_x = 1200 - (2 * 60)    = 1080
 
-        # determine total number of aliens per row & total number of rows 
-        number_aliens_x = available_space_x // ( 2 * alien_width )
-        number_rows = available_space_y // ( 2 * alien_height )
-            # number_aliens_x = 1080 // (2 * 60)   = 9
-            # number_rows = 578 // (2 * 58)  = 4
+            # determine total number of aliens per row & total number of rows 
+            number_aliens_x = available_space_x // ( 2 * alien_width )
+            number_rows = available_space_y // ( 2 * alien_height )
+                # number_aliens_x = 1080 // (2 * 60)   = 9
+                # number_rows = 578 // (2 * 58)  = 4
 
-        # Create rows of aliens
-        for row_number in range(number_rows):
-            for alien_number in range(number_aliens_x):
-            # Fill row with aliens
-                self._create_alien(alien_number, row_number )
+            # Create rows of aliens
+            for row_number in range(number_rows):
+                for alien_number in range(number_aliens_x):
+                # Fill row with aliens
+                    self._create_alien(alien_number, row_number )
 
-        # rect = <rect(x, y, width, height)>       <rect(180, 58, 60, 58)>
-    def _create_alien(self, alien_number, row_number):
-        alien = Alien(self)
-        alien_width, height = alien.rect.size
-        alien.x = alien_width + 2 * alien_width * alien_number
-            # alien.x = 60 + (2 * 60 * 0..9)   alien.x = 60.0, 180.0, 300.0, 420.0, ...
-        alien.rect.x = alien.x
-        # Each alien row starts below at twice the height of an alien ship
-        alien.rect.y = alien.rect.height + 2 * alien.rect.height * row_number 
-            # alien.rect.y =   58 + (2 * 58 * 0..4)                     58, 174, 290 
-        self.aliens.add(alien)
-    ~~~
+            # rect = <rect(x, y, width, height)>       <rect(180, 58, 60, 58)>
+        def _create_alien(self, alien_number, row_number):
+            alien = Alien(self)
+            alien_width, height = alien.rect.size
+            alien.x = alien_width + 2 * alien_width * alien_number
+                # alien.x = 60 + (2 * 60 * 0..9)   alien.x = 60.0, 180.0, 300.0, 420.0, ...
+            alien.rect.x = alien.x
+            # Each alien row starts below at twice the height of an alien ship
+            alien.rect.y = alien.rect.height + 2 * alien.rect.height * row_number 
+                # alien.rect.y =   58 + (2 * 58 * 0..4)                     58, 174, 290 
+            self.aliens.add(alien)
+        ~~~
 
 4) Add alien settings to `settings.py`
 
@@ -458,82 +458,82 @@ python3 -m pip install -U pygame==2.0.0.dev6 --user
     ~~~
 
 6) Add `check_edges` and `update` to `alien.py`    
-- this helps set up how to change direction when alien fleet detects edges of screen
-- `alien.rect` returns `rect = <rect(x, y, width, height)> `
-- 1200 x 800 screen size, the fleet will change direction as follow from debug code
-    ~~~ bash
-            NOW self.rect.right  1200
-            NOW screen_rect.right  1200
-            NOW self.rect.left  1140
-    alien.rect BEFORE <rect(1140, 58, 60, 58)>
-    direction BEFORE  1
-    direction AFTER  -1
-    Change in y is  68
-            NOW self.rect.right  60
-            NOW screen_rect.right  1200
-            NOW self.rect.left  0
-    alien.rect BEFORE <rect(0, 68, 60, 58)>
-    direction BEFORE  -1
-    direction AFTER  1
-    Change in y is  78
-            NOW self.rect.right  1200
-            NOW screen_rect.right  1200
-            NOW self.rect.left  1140
-    alien.rect BEFORE <re
-    ~~~
+   - this helps set up how to change direction when alien fleet detects edges of screen
+   - `alien.rect` returns `rect = <rect(x, y, width, height)> `
+   - 1200 x 800 screen size, the fleet will change direction as follow from debug code
+       ~~~ bash
+               NOW self.rect.right  1200
+               NOW screen_rect.right  1200
+               NOW self.rect.left  1140
+       alien.rect BEFORE <rect(1140, 58, 60, 58)>
+       direction BEFORE  1
+       direction AFTER  -1
+       Change in y is  68
+               NOW self.rect.right  60
+               NOW screen_rect.right  1200
+               NOW self.rect.left  0
+       alien.rect BEFORE <rect(0, 68, 60, 58)>
+       direction BEFORE  -1
+       direction AFTER  1
+       Change in y is  78
+               NOW self.rect.right  1200
+               NOW screen_rect.right  1200
+               NOW self.rect.left  1140
+       alien.rect BEFORE <re
+       ~~~
 
 
-    ~~~ py
-        def _check_fleet_edges(self):
-            """ Determine if fleet hits edge of screen and respond  """
-            for alien in self.aliens.sprites():
-                if alien.check_edges():
-                    print("alien.rect BEFORE", alien.rect) # rect = <rect(x, y, width, height)> 
-                    print("direction BEFORE ", self.settings.fleet_direction)
-                    self._change_fleet_direction()
-                    print("direction AFTER ", self.settings.fleet_direction)
-                    print("Change in y is ", alien.rect.y)
-                    break
+       ~~~ py
+           def _check_fleet_edges(self):
+               """ Determine if fleet hits edge of screen and respond  """
+               for alien in self.aliens.sprites():
+                   if alien.check_edges():
+                       print("alien.rect BEFORE", alien.rect) # rect = <rect(x, y, width, height)> 
+                       print("direction BEFORE ", self.settings.fleet_direction)
+                       self._change_fleet_direction()
+                       print("direction AFTER ", self.settings.fleet_direction)
+                       print("Change in y is ", alien.rect.y)
+                       break
 
-        def _change_fleet_direction(self):
-            """ Drop the entire fleet and change direction """  
-            for alien in self.aliens.sprites():
-                alien.rect.y += self.settings.fleet_drop_speed
-            self.settings.fleet_direction *= -1   
-    ~~~
+           def _change_fleet_direction(self):
+               """ Drop the entire fleet and change direction """  
+               for alien in self.aliens.sprites():
+                   alien.rect.y += self.settings.fleet_drop_speed
+               self.settings.fleet_direction *= -1   
+       ~~~
 
 7) Update `update_bullets` in `alien_invasion.py` to detect if bullets hit an alien and add new method `_check_bullet_alien_collisions`
-- the sprite positions are checked for overlap
-- aliens and bullet will dissappear if collision occurs
+   - the sprite positions are checked for overlap
+   - aliens and bullet will dissappear if collision occurs
 
-    ~~~ py
-        def _update_bullets(self):
-            """  Update position of bullets to get rid of bullets that have exited screen """
-            # Remove bullets that have reached top of screen
-            self.bullets.update()    ## MOVED HERE !!!!!!
-            
-            for bullet in self.bullets.copy():
-                if bullet.rect.bottom <= 0:
-                    self.bullets.remove(bullet)
-                # print(len(self.bullets)) 
+       ~~~ py
+           def _update_bullets(self):
+               """  Update position of bullets to get rid of bullets that have exited screen """
+               # Remove bullets that have reached top of screen
+               self.bullets.update()    ## MOVED HERE !!!!!!
+               
+               for bullet in self.bullets.copy():
+                   if bullet.rect.bottom <= 0:
+                       self.bullets.remove(bullet)
+                   # print(len(self.bullets)) 
 
-            self._check_bullet_alien_collisions()
-    ~~~
+               self._check_bullet_alien_collisions()
+       ~~~
 
-    ~~~ py
-        def _check_bullet_alien_collisions(self):
-            """ Handles hits to fleet """
-            collisions = pygame.sprite.groupcollide(self.bullets, self.aliens, True, True)
-            
-            # # print out collisions dictionary
-            # for item in collisions:
-            #     print("key = {}, value = {}".format(item, collisions[item]))
+       ~~~ py
+           def _check_bullet_alien_collisions(self):
+               """ Handles hits to fleet """
+               collisions = pygame.sprite.groupcollide(self.bullets, self.aliens, True, True)
+               
+               # # print out collisions dictionary
+               # for item in collisions:
+               #     print("key = {}, value = {}".format(item, collisions[item]))
 
-            if not self.aliens:
-                # Destroy bullets and create new fleet
-                self.bullets.empty()
-                self._create_fleet() 
-    ~~~
+               if not self.aliens:
+                   # Destroy bullets and create new fleet
+                   self.bullets.empty()
+                   self._create_fleet() 
+       ~~~
 
 #### Set up how game ends
 
@@ -575,20 +575,20 @@ python3 -m pip install -U pygame==2.0.0.dev6 --user
     ~~~
 
 4) Update `alien_invasion.py`
-- import `GameStats` & `sleep`
-- create instance with in `__init__`
-  
-    ~~~ py
-    ...
-    from game_stats import GameStats
-    from time import slee
-    ...
-        pygame.display.set_caption("Alien_Invasion")
+   - import `GameStats` & `sleep`
+   - create instance with in `__init__`
+     
+       ~~~ py
+       ...
+       from game_stats import GameStats
+       from time import slee
+       ...
+           pygame.display.set_caption("Alien_Invasion")
 
-        # Create instance of game statistics
-        self.stats = GameStats(self)
-    ...
-    ~~~
+           # Create instance of game statistics
+           self.stats = GameStats(self)
+       ...
+       ~~~
 
 5) Create `_ship_hit` method
 
@@ -725,50 +725,50 @@ python3 -m pip install -U pygame==2.0.0.dev6 --user
     ~~~
 
 4) Add a check for `MOUSEBUTTONDOWN` in `_check_events`
-- the position of the mouse if assigned to `mouse_pos`
-- this location is then compared to Play button location in `_check_play_button` defined in 5)
+   - the position of the mouse if assigned to `mouse_pos`
+   - this location is then compared to Play button location in `_check_play_button` defined in 5)
 
-    ~~~ py
-        def _check_events(self):
-            # create event listener to watch keyboard or mouse events
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    sys.exit()
-                elif event.type == pygame.KEYDOWN:
-                    self._check_keydown_events(event)
-                elif event.type == pygame.KEYUP:
-                    self._check_keyup_events(event)
-                elif event.type == pygame.MOUSEBUTTONDOWN:
-                    mouse_pos = pygame.mouse.get_pos()
-                    self._check_play_button(mouse_pos)
-    ~~~
+       ~~~ py
+           def _check_events(self):
+               # create event listener to watch keyboard or mouse events
+               for event in pygame.event.get():
+                   if event.type == pygame.QUIT:
+                       sys.exit()
+                   elif event.type == pygame.KEYDOWN:
+                       self._check_keydown_events(event)
+                   elif event.type == pygame.KEYUP:
+                       self._check_keyup_events(event)
+                   elif event.type == pygame.MOUSEBUTTONDOWN:
+                       mouse_pos = pygame.mouse.get_pos()
+                       self._check_play_button(mouse_pos)
+       ~~~
 
 5) Add `_check_play_button` method
-- the `collidepoint` method verifies if the location of the play button coincides with the mouse click location
-- if the same, `game_active` set to True
-- The area where the play button is located will not react to mouse clicks once the game starts
-- the mouse cursor becomes invisible when inside an active game
+   - the `collidepoint` method verifies if the location of the play button coincides with the mouse click location
+   - if the same, `game_active` set to True
+   - The area where the play button is located will not react to mouse clicks once the game starts
+   - the mouse cursor becomes invisible when inside an active game
 
-    ~~~ py
-    def _check_play_button(self, mouse_pos):
-        """ Start a new game when player clicks Play """ 
-        button_clicked = self.play_button.rect.collidepoint(mouse_pos)
-        if button_clicked and not self.stats.game_active:
-            # Reset game stats
-            self.stats.reset_stats()
-            self.stats.game_active = True
+       ~~~ py
+       def _check_play_button(self, mouse_pos):
+           """ Start a new game when player clicks Play """ 
+           button_clicked = self.play_button.rect.collidepoint(mouse_pos)
+           if button_clicked and not self.stats.game_active:
+               # Reset game stats
+               self.stats.reset_stats()
+               self.stats.game_active = True
 
-            # Remove any remaining aliens and bullets
-            self.aliens.empty()       
-            self.bullets.empty()
+               # Remove any remaining aliens and bullets
+               self.aliens.empty()       
+               self.bullets.empty()
 
-            # Create new fleet and center the ship
-            self._create_fleet()
-            self.ship.center_ship()   
+               # Create new fleet and center the ship
+               self._create_fleet()
+               self.ship.center_ship()   
 
-            # Hide the mouse cursor when inside of game window
-            pygame.mouse.set_visible(False)
-    ~~~
+               # Hide the mouse cursor when inside of game window
+               pygame.mouse.set_visible(False)
+       ~~~
 
 6) Modify the end of `_ship_hit` to make mouse visible again at the end of a game
 
@@ -795,35 +795,36 @@ python3 -m pip install -U pygame==2.0.0.dev6 --user
     ~~~
 
 #### Changing Level Behavior
+
 1)  Modify `settings.py`
-- add `speedup_scale` attribute
+    - add `speedup_scale` attribute
 
-    ~~~ py
-        # Game speedup
-        self.speedup_scale = 1.2
-    ~~~
+        ~~~ py
+            # Game speedup
+            self.speedup_scale = 1.2
+        ~~~
 
-- add `initialize_dynamic_settings` & `increase_speed`
-- Note that `fleet_direction` is added to keep aliens always starting toward right
+    - add `initialize_dynamic_settings` & `increase_speed`
+    - Note that `fleet_direction` is added to keep aliens always starting toward right
 
-    ~~~ py
-        self.initialize_dynamic_settings()
+        ~~~ py
+            self.initialize_dynamic_settings()
 
-        def initialize_dynamic_settings(self):
-            """ Initialize settings that change during gameplay """
-            self.ship_speed = 1.5
-            self.bullet_speed = 3.0
-            self.alien_speed = 1.0
+            def initialize_dynamic_settings(self):
+                """ Initialize settings that change during gameplay """
+                self.ship_speed = 1.5
+                self.bullet_speed = 3.0
+                self.alien_speed = 1.0
 
-            # fleet direction   `1 is to the right` & `-1 is to the left`
-            self.fleet_direction = 1
+                # fleet direction   `1 is to the right` & `-1 is to the left`
+                self.fleet_direction = 1
 
-        def increase_speed(self):
-            """ Increase speed settings """
-            self.ship_speed *= self.speedup_scale
-            self.bullet_speed *= self.speedup_scale
-            self.alien_speed *= self.speedup_scale
-    ~~~
+            def increase_speed(self):
+                """ Increase speed settings """
+                self.ship_speed *= self.speedup_scale
+                self.bullet_speed *= self.speedup_scale
+                self.alien_speed *= self.speedup_scale
+        ~~~
 
 2) Within `alien_invasion` add `increase_speed` call 
 
@@ -918,9 +919,85 @@ python3 -m pip install -U pygame==2.0.0.dev6 --user
    self.sb = Scoreboard(self)
    ~~~
 
-- add `show_score` to the `_update_screen`  method
+   - add `show_score` to the `_update_screen`  method
 
-    ~~~ py
-    # Draw scoreboard info
-    self.sb.show_score()
-    ~~~
+       ~~~ py
+       # Draw scoreboard info
+       self.sb.show_score()
+       ~~~
+
+#### Show score changes during game
+
+1) Modify `settings.py`
+
+   - Each alien ship is set to be worth 50 points within the `initialize_dynamic_settings` method
+
+       ~~~ py
+           # Scoring
+           self.alien_points = 50
+       ~~~
+
+   - After a level is changed, the point value is increased within the `__init__` method
+
+       ~~~ py
+       # Score increase scale
+       self.score_scale = 1.5
+       ~~~
+
+   - Display the points in integer format within the `increase_speed` method and print them
+
+       ~~~ py
+       def increase_speed(self):
+       """ Increase speed settings """
+       self.ship_speed *= self.speedup_scale
+       self.bullet_speed *= self.speedup_scale
+       self.alien_speed *= self.speedup_scale
+       self.alien_points = int(self.alien_points * self.score_scale)
+       print(self.alien_points)
+       ~~~
+
+- 
+
+2) Modify `alien_invasion.py`
+
+   - After a bullet & alien collide, update the score in the `_check_bullet_alien_collisions` method
+
+   ~~~ py
+    def _check_bullet_alien_collisions(self):
+        """ Handles hits to fleet """
+        collisions = pygame.sprite.groupcollide(self.bullets, self.aliens, True, True)
+        
+        if collisions:
+            for aliens in collisions.values():
+                print(f' Collision values() is {aliens}')
+                self.stats.score += self.settings.alien_points
+            self.sb.prep_score()
+   ~~~
+
+   - Call prep_score() within the `_check_play_button` method to reset to score to 0
+
+   ~~~ py
+       # Reset game stats
+       self.stats.reset_stats()
+       self.stats.game_active = True
+       self.sb.prep_score()
+   ~~~
+
+3) Modify `scoreboard.py` to show rounded values in multiple of 10
+
+   - before
+
+   ~~~ py
+   def prep_score(self):
+           """  Render score values into screen images """    
+           score_str = str(self.stats.score)    # convert to string for display
+           self.score_image = self.font.render(score_str, True, self.text_color, self.settings.bg_color)
+   ~~~
+
+   - after
+
+   ~~~ py
+   rounded_score = round(self.stats.score, -1)  # round to the nearest tenth
+           score_str = "{:,}".format(rounded_score)    # convert to string for display
+           self.score_image = self.font.render(score_str, True, self.text_color, self.settings.bg_color)
+   ~~~

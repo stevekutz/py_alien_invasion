@@ -20,7 +20,8 @@ class Scoreboard:
 
     def prep_score(self):
         """  Render score values into screen images """    
-        score_str = str(self.stats.score)    # convert to string for display
+        rounded_score = round(self.stats.score, -1)  # round to the nearest tenth
+        score_str = "{:,}".format(rounded_score)    # convert to string for display
         self.score_image = self.font.render(score_str, True, self.text_color, self.settings.bg_color)
 
         # Display score in top right of screen

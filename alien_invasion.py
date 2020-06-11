@@ -90,6 +90,7 @@ class AlienInvasion:
             # Reset game stats
             self.stats.reset_stats()
             self.stats.game_active = True
+            self.sb.prep_score()
 
             # Remove any remaining aliends and bullets
             self.aliens.empty()       
@@ -155,6 +156,12 @@ class AlienInvasion:
         """ Handles hits to fleet """
         collisions = pygame.sprite.groupcollide(self.bullets, self.aliens, True, True)
         
+        if collisions:
+            for aliens in collisions.values():
+                print(f' Collision values() is {aliens}')
+                self.stats.score += self.settings.alien_points
+            self.sb.prep_score()
+
         # # print out collisions dictionary
         # for item in collisions:
         #     print("key = {}, value = {}".format(item, collisions[item]))
