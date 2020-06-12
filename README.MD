@@ -956,7 +956,7 @@ python3 -m pip install -U pygame==2.0.0.dev6 --user
        print(self.alien_points)
        ~~~
 
-- 
+
 
 2) Modify `alien_invasion.py`
 
@@ -1004,18 +1004,22 @@ python3 -m pip install -U pygame==2.0.0.dev6 --user
 
 #### Set up saving High Score
 
-- move `self.score = 0` from `reset_stats` to the the `__init__` method in `game_stats.py`
-- add `high_score` to the `__init__` method
+   - move `self.score = 0` from `reset_stats` to the the `__init__` method in `game_stats.py`
+   - add `high_score` to the `__init__` method
     ~~~ py
     def __init__(self, ai_game):
         self.settings = ai_game.settings 
         self.reset_stats()
         self.game_active = False
-        self.score = 0
         self.high_score = 0
+    ...
+    def reset_stats(self):
+    self.ships_left = self.settings.ship_limit
+    self.score = 0
+    self.level = 1    
     ~~~
 
-- add attribute for storing high score attribute within `__init__` method in `scoreboard.py`
+    - add attribute for storing high score attribute within `__init__` method in `scoreboard.py`
 
     ~~~ py
     # Prepare the initial score image
@@ -1023,7 +1027,7 @@ python3 -m pip install -U pygame==2.0.0.dev6 --user
     self.prep_high_score()
     ~~~
 
-  - add `prep_high_score` method to `scoreboard.py`
+    - add `prep_high_score` method to `scoreboard.py`
 
     ~~~ py
     def prep_high_score(self):
@@ -1047,43 +1051,44 @@ python3 -m pip install -U pygame==2.0.0.dev6 --user
             self.screen.blit(self.high_score_image, self.high_score_rect)
     ~~~
 
-  - add the `check_high_score` method
+    - add the `check_high_score` method
 
 
-  ~~~ py
-      def check_high_score(self):
-          """ Cherck for new high score """    
-          if self.stats.score > self.stats.high_score:
-              self.stats.high_score = self.stats.score
-              self.prep_high_score()
-  ~~~
+    ~~~ py
+        def check_high_score(self):
+            """ Cherck for new high score """    
+            if self.stats.score > self.stats.high_score:
+                self.stats.high_score = self.stats.score
+                self.prep_high_score()
+    ~~~
 
-  - add `check_high_score` to the `_check_bullet_alein_collisions` in `alien_invasion.py`
+    - add `check_high_score` to the `_check_bullet_alein_collisions` in `alien_invasion.py`
 
-  ~~~ py
-  def _check_bullet_alien_collisions(self):
-    """ Handles hits to fleet """
-    collisions = pygame.sprite.groupcollide(self.bullets, self.aliens, True, True)
-    
-    if collisions:
-        for aliens in collisions.values():
-            print(f' Collision values() is {aliens}')
-            self.stats.score += self.settings.alien_points
-        self.sb.prep_score()
-        self.sb.check_high_score()
-  ~~~
-  #### Set up showing Level
+    ~~~ py
+    def _check_bullet_alien_collisions(self):
+        """ Handles hits to fleet """
+        collisions = pygame.sprite.groupcollide(self.bullets, self.aliens, True, True)
+        
+        if collisions:
+            for aliens in collisions.values():
+                print(f' Collision values() is {aliens}')
+                self.stats.score += self.settings.alien_points
+            self.sb.prep_score()
+            self.sb.check_high_score()
+    ~~~
+
+#### Set up showing Current Level
 
 1) Modify `game_stats.py`
 
-   - add attribute to `reset_stats` method
+    - add attribute to `reset_stats` method
 
-   ~~~ py
+    ~~~ py
        def reset_stats(self):
            self.ships_left = self.settings.ship_limit
            # self.score = 0
            self.level = 1
-   ~~~
+     ~~~
 
 2) Modify `scoreboard.py`
 
@@ -1154,4 +1159,102 @@ python3 -m pip install -U pygame==2.0.0.dev6 --user
            self.stats.game_active = True
            self.sb.prep_score()
            self.sb.prep_level()
+   ~~~
+
+#### Set up showing Ships Remaining
+
+1) Create Ship class that inherits from `Sprite` in order to show group of ships in `ship.py`
+
+   - add import from `Sprite`
+   - inherit from `Sprite` in `Ship` class
+
+    ~~~ py
+    from pygame.sprite import Sprite
+
+    class Ship(Sprite):
+        """A class to manage the ship """
+
+        # 
+        def __init__(self,ai_game):
+            """ Initialize ship to self and instance of current AlienInvasion class  """
+            super().__init__()
+    ~~~
+
+2) Modify `scoreboard.py`
+
+   -  import Group of sprites & Ship class
+
+   ~~~ py
+   from pygame.sprite import Group
+   from ship import Ship
+   ~~~
+
+   - assign game instance to attribute and make call to `prep_ships`
+
+   ~~~ py
+   def __init__(self, ai_game):
+       """ Init scoring attributes """
+       self.ai_game = ai_game
+       self.screen = ai_game.screen
+       self.screen_rect = self.screen.get_rect()
+       self.settings = ai_game.settings
+       self.stats = ai_game.stats
+
+       # Font settings for scorring info   
+       self.text_color = (30, 30, 30)
+       self.font = pygame.font.SysFont(None, 48)
+
+       # Prepare the initial score image
+       self.prep_score()
+       self.prep_high_score()
+       self.prep_level()
+       self.prep_ships()
+   ~~~
+
+   - add `prep_ships` method
+
+   ~~~ py
+   def prep_ships(self):
+     """ Show how many ships are left """
+     self.ships = Group()
+     for ship_number in range(self.stats.ships_left):
+         ship = Ship(self.ai_game)
+         ship.rect.x = 10 + ship_number * ship.rect.width
+         ship.rect.y = 10
+         self.ships.add(ship)   
+   ~~~
+
+   - draw the current number of ships to the screen with the `show_score` method
+
+   ~~~ py
+   def show_score(self):
+       """ Draw score to the screen """    
+       self.screen.blit(self.score_image, self.score_rect)
+       self.screen.blit(self.high_score_image, self.high_score_rect)
+       self.screen.blit(self.level_image, self.level_rect)
+       self.ships.draw(self.screen
+   ~~~
+
+3) Modify `alien_invasion.py`
+
+   - add call to `prep_ships` in the `_check_play_button` method
+
+   ~~~ py
+   # Reset game stats
+   self.stats.reset_stats()
+   self.stats.game_active = True
+   self.sb.prep_score()
+   self.sb.prep_level()
+   self.sb.prep_ships()
+   ~~~
+
+   - decrement number of images to reflect current numner of ships left
+
+   ~~~ py
+   def _ship_hit(self):
+       """ Respond to ship being hit by alien """
+       if self.stats.ships_left > 0:
+           # Decrement ships_left
+           self.stats.ships_left -= 1
+           self.sb.prep_ships()
    ~~~
