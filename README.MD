@@ -1025,18 +1025,18 @@ python3 -m pip install -U pygame==2.0.0.dev6 --user
 
   - add `prep_high_score` method to `scoreboard.py`
 
-  ~~~ py
-  def prep_high_score(self):
-      """ Turn the high score into a rendered image """
-      high_score = round(self.stats.high_score, -1)
-      high_score_str = "{:,}".format(high_score)
-      self.high_score_image = self.font.render(high_score_str, True, self.text_color, self.settings.bg_color)
+    ~~~ py
+    def prep_high_score(self):
+        """ Turn the high score into a rendered image """
+        high_score = round(self.stats.high_score, -1)
+        high_score_str = "{:,}".format(high_score)
+        self.high_score_image = self.font.render(high_score_str, True, self.text_color, self.settings.bg_color)
 
-      # Center high score at top of screen
-      self.high_score_rect = self.high_score_image.get_rect()
-      self.high_score_rect.centerx = self.screen_rect.centerx
-      self.high_score_rect.top = self.score_rect.top   
-  ~~~
+        # Center high score at top of screen
+        self.high_score_rect = self.high_score_image.get_rect()
+        self.high_score_rect.centerx = self.screen_rect.centerx
+        self.high_score_rect.top = self.score_rect.top   
+    ~~~
 
     - add the high score to the `show_score`  method
 
@@ -1072,3 +1072,86 @@ python3 -m pip install -U pygame==2.0.0.dev6 --user
         self.sb.prep_score()
         self.sb.check_high_score()
   ~~~
+  #### Set up showing Level
+
+1) Modify `game_stats.py`
+
+   - add attribute to `reset_stats` method
+
+   ~~~ py
+       def reset_stats(self):
+           self.ships_left = self.settings.ship_limit
+           # self.score = 0
+           self.level = 1
+   ~~~
+
+2) Modify `scoreboard.py`
+
+   - add call to `prep_level` method to `__init__` method
+
+    ~~~ py
+    def __init__(self, ai_game):
+        self.settings = ai_game.settings 
+        self.reset_stats()
+        self.game_active = False
+        self.score = 0
+        self.high_score = 0
+        self.prep_level()
+    ~~~
+
+   - add `prep_level` method
+
+   ~~~ py
+   def prep_level(self):
+       """ Turn the level into a rendered image """    
+       level_str = str(self.stats.level)
+       self.level_image = self.font.render(level_str, True, self.text_color, self.settings.bg_color)
+
+       # Position the level belwo the screen
+       self.level_rect = self.level_image.get_rect()
+       self.level_rect.right = self.score_rect.right
+       self.level_rect.top = self.score_rect.bottom + 10 
+    ~~~
+
+   - add level to `show_score` method 
+
+   ~~~ py
+   def show_score(self):
+       """ Draw score to the screen """    
+       self.screen.blit(self.score_image, self.score_rect)
+       self.screen.blit(self.high_score_image, self.high_score_rect)
+       self.screen.blit(self.level_image, self.level_rect)
+   ~~~
+
+3) Update `alien_invasion`
+
+   - add update to increase level value within `_check_bullet_alien_collisions`
+
+   ~~~ py
+   if not self.aliens:
+       # Destroy bullets and create new fleet
+       self.bullets.empty()
+       self._create_fleet()    
+       self.settings.increase_speed()
+
+       # Increase level
+       self.stats.level += 1
+       self.sb.prep_level()
+   ~~~
+
+   - add `self.sb.prep_level()` call within if statement of `_check_play_button` method
+
+   ~~~ py
+   def _check_play_button(self, mouse_pos):
+       """ Start a new game when player clicks Play """ 
+       button_clicked = self.play_button.rect.collidepoint(mouse_pos)
+       if button_clicked and not self.stats.game_active:
+           # Reset game settings
+           self.settings.initialize_dynamic_settings()
+
+           # Reset game stats
+           self.stats.reset_stats()
+           self.stats.game_active = True
+           self.sb.prep_score()
+           self.sb.prep_level()
+   ~~~
