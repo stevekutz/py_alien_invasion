@@ -1258,3 +1258,33 @@ python3 -m pip install -U pygame==2.0.0.dev6 --user
            self.stats.ships_left -= 1
            self.sb.prep_ships()
    ~~~
+
+#### dding some more debugging code
+
+   - intital attempt to see key value pairs in `collisions` dictionary
+
+    ~~~ py
+    def _check_bullet_alien_collisions(self):
+        """ Handles hits to fleet """
+        collisions = pygame.sprite.groupcollide(self.bullets, self.aliens, True, True)
+        
+        if collisions:
+            for aliens in collisions.values():
+                # print(f' Collision values() is {aliens}')
+                self.stats.score += self.settings.alien_points * len(aliens)
+            self.sb.prep_score()
+            self.sb.check_high_score()
+
+            # print out collisions dictionary
+            for key, value in collisions.items():
+                print(f' key: {key} value: {value}')
+    ~~~
+
+    - results in 
+
+    ~~~ bash 
+    key: <Bullet sprite(in 0 groups)> value: [<Alien sprite(in 0 groups)>]
+    key: <Bullet sprite(in 0 groups)> value: [<Alien sprite(in 0 groups)>]
+    key: <Bullet sprite(in 0 groups)> value: [<Alien sprite(in 0 groups)>]
+    key: <Bullet sprite(in 0 groups)> value: [<Alien sprite(in 0 groups)>]
+    ~~~
