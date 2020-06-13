@@ -1,4 +1,4 @@
-### Alien Invastion
+### Alien Invasion
 
 #### Project Setup
 1) Create virtual environment
@@ -206,11 +206,11 @@ python3 -m pip install -U pygame==2.0.0.dev6 --user
 
 ~~~ py
     def update(self):
-        """ Update the ship position based on the movement flag  """    
+        """ Update the ship position based on the movement flag  """
         if self.moving_right:
             self.rect.x += 1
         if self.moving_left:
-            self.rect.x -= 1    
+            self.rect.x -= 1
 
     def blitme(self):
 ~~~
@@ -237,16 +237,16 @@ python3 -m pip install -U pygame==2.0.0.dev6 --user
 
        ~~~ py
            def update(self):
-               """ Update the ship position based on the movement flag  """    
+               """ Update the ship position based on the movement flag  """
                if self.moving_right and self.rect.right < self.screen_rect.right:
                    # self.rect.x += 1
                    self.x += self.settings.ship_speed
                if self.moving_left and self.rect.left > 0:
-                   # self.rect.x -= 1   
-                   self.x -= self.settings.ship_speed      
+                   # self.rect.x -= 1
+                   self.x -= self.settings.ship_speed
 
                # update the rect obj
-               self.rect.x = self.x 
+               self.rect.x = self.x
        ~~~
 
 8) Refactor `_check_events` and add helper methods in `alein_invasion.py`  
@@ -269,7 +269,7 @@ python3 -m pip install -U pygame==2.0.0.dev6 --user
             elif event.key == pygame.K_LEFT:
                 self.ship.moving_left = True   # move ship to the left
             elif event.key == pygame.K_q:      # quit is Q is pressed
-                sys.exit()    
+                sys.exit()
 
         def _check_keyup_events(self, event):
             """ respond to changes in direction """
@@ -315,7 +315,7 @@ python3 -m pip install -U pygame==2.0.0.dev6 --user
 
 
         def update(self):
-            """ MOve the bullet up the screen  """    
+            """ MOve the bullet up the screen  """
             # Update the decimal position of the bullet
             self.y -= self.settings.bullet_speed
             # Update the rect position
@@ -457,7 +457,7 @@ python3 -m pip install -U pygame==2.0.0.dev6 --user
             self.aliens.update()
     ~~~
 
-6) Add `check_edges` and `update` to `alien.py`    
+6) Add `check_edges` and `update` to `alien.py`
    - this helps set up how to change direction when alien fleet detects edges of screen
    - `alien.rect` returns `rect = <rect(x, y, width, height)> `
    - 1200 x 800 screen size, the fleet will change direction as follow from debug code
@@ -499,12 +499,12 @@ python3 -m pip install -U pygame==2.0.0.dev6 --user
                """ Drop the entire fleet and change direction """  
                for alien in self.aliens.sprites():
                    alien.rect.y += self.settings.fleet_drop_speed
-               self.settings.fleet_direction *= -1   
+               self.settings.fleet_direction *= -1
        ~~~
 
 7) Update `update_bullets` in `alien_invasion.py` to detect if bullets hit an alien and add new method `_check_bullet_alien_collisions`
    - the sprite positions are checked for overlap
-   - aliens and bullet will dissappear if collision occurs
+   - aliens and bullet will disappear if collision occurs
 
        ~~~ py
            def _update_bullets(self):
@@ -532,7 +532,7 @@ python3 -m pip install -U pygame==2.0.0.dev6 --user
                if not self.aliens:
                    # Destroy bullets and create new fleet
                    self.bullets.empty()
-                   self._create_fleet() 
+                   self._create_fleet()
        ~~~
 
 #### Set up how game ends
@@ -581,7 +581,7 @@ python3 -m pip install -U pygame==2.0.0.dev6 --user
        ~~~ py
        ...
        from game_stats import GameStats
-       from time import slee
+       from time import sleep
        ...
            pygame.display.set_caption("Alien_Invasion")
 
@@ -899,7 +899,7 @@ python3 -m pip install -U pygame==2.0.0.dev6 --user
             self.score_rect.top =  20 # offset 20 from top edge
 
         def show_score(self):
-            """ Draw score to the screen """    
+            """ Draw score to the screen """
             self.screen.blit(self.score_image, self.score_rect)
     ~~~
 
@@ -989,7 +989,7 @@ python3 -m pip install -U pygame==2.0.0.dev6 --user
 
    ~~~ py
    def prep_score(self):
-           """  Render score values into screen images """    
+           """  Render score values into screen images """
            score_str = str(self.stats.score)    # convert to string for display
            self.score_image = self.font.render(score_str, True, self.text_color, self.settings.bg_color)
    ~~~
@@ -1108,7 +1108,7 @@ python3 -m pip install -U pygame==2.0.0.dev6 --user
 
    ~~~ py
    def prep_level(self):
-       """ Turn the level into a rendered image """    
+       """ Turn the level into a rendered image """
        level_str = str(self.stats.level)
        self.level_image = self.font.render(level_str, True, self.text_color, self.settings.bg_color)
 
@@ -1286,5 +1286,5 @@ python3 -m pip install -U pygame==2.0.0.dev6 --user
     key: <Bullet sprite(in 0 groups)> value: [<Alien sprite(in 0 groups)>]
     key: <Bullet sprite(in 0 groups)> value: [<Alien sprite(in 0 groups)>]
     key: <Bullet sprite(in 0 groups)> value: [<Alien sprite(in 0 groups)>]
-    key: <Bullet sprite(in 0 groups)> value: [<Alien sprite(in 0 groups)>]
+    key: <Bullet sprite(in 0 groups)> value: [<Alien sprite(in 0 groups)>]django_
     ~~~
